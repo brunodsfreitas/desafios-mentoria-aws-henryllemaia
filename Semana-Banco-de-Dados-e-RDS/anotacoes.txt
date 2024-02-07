@@ -1,0 +1,34 @@
+Criar Base de Dados no RDS (Postgres);
+Realizar acesso ao banco através de um gerenciador de banco de dados (DBeaver);
+Criar uma tabela com dados no banco;
+Criar Snapshot/Backup do banco;
+Restaurar em um momento exato;
+Multi AZ {
+    Failover assume a carga dos backups;
+    Janela de update;
+    Não pode usar leitura no Failover;
+}
+while true; do host desafio-db.c6uxh1t95jvm.us-east-2.rds.amazonaws.com | grep alias; sleep 1; done
+
+
+Schema do Banco de Exemplo
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+Inserts para popular a tabela;
+
+INSERT INTO users (username, email, password) VALUES ('jon_snow', 'jon_snow@example.com', 'winteriscoming');
+INSERT INTO users (username, email, password) VALUES ('daenerys_targaryen', 'daenerys@example.com', 'fireandblood');
+INSERT INTO users (username, email, password) VALUES ('tyrion_lannister', 'tyrion@example.com', 'iamthegodofwine');
+INSERT INTO users (username, email, password) VALUES ('cersei_lannister', 'cersei@example.com', 'hearmeroar');
+
+master username
+thronesking
+south#north
+
+database: gameofthrones

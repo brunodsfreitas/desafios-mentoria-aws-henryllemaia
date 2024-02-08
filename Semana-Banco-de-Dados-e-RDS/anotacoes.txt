@@ -1,3 +1,5 @@
+----------------
+desafio 1
 Criar Base de Dados no RDS (Postgres);
 Realizar acesso ao banco através de um gerenciador de banco de dados (DBeaver);
 Criar uma tabela com dados no banco;
@@ -32,3 +34,82 @@ thronesking
 south#north
 
 database: gameofthrones
+
+----------------
+desafio 2
+criar instancia com 2gb mem 
+https://hub.docker.com/_/microsoft-mssql-server
+https://github.com/Microsoft/sql-server-samples/releases/tag/adventureworks
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=P@ssword@" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+Iniciar SQL Server em Docker
+Copiar arquivos do host para o container
+Restaurar um arquivo de backup do banco (BAK)
+
+RESTORE FILELISTONLY FROM DISK = 'NOME_DO_SEU_ARQUIVO.bak'
+
+RESTORE DATABASE NOME_DO_BANCO FROM DISK = 'NOME_DO_SEU_ARQUIVO.bak' WITH 
+MOVE 'AdventureWorks2019' TO '/var/opt/mssql/data/AdventureWorks2019.mdf', 
+MOVE 'AdventureWorks2019_log' TO '/var/opt/mssql/data/AdventureWorks2019_log.ldf'
+
+Acesso ao banco via DBeaver
+tunnel para acesso
+
+Option group - OP (para restore)
+IAM para OP
+criar RDS
+user: admin | ZnkJf9mybFZ3xXJELsmN
+security groups (internet para ssh) (porteiro 22)
+security groups (ec2 para rds) (porteiro )
+Criar bucket S3
+criar role ec2 para acesso ao s3
+IAM - ROLES - NEW - CUSTOM - PASTE POLICY
+RDS - option groups - new - para bkp/restore sql 19
+permission - policy - new
+add option no OP (iam restore)
+alterar no RDS o OP
+aws s3 cp file.bak s3://bucket/
+aws s3 ls s3://bucket/
+olhar documentação para restore file unico
+
+exec msdb.dbo.rds_restore_database
+@restore_db_name='AdventureWorks',
+@s3_arn_to_restore_from='arn:aws:s3:::lab-aws-sql-server/AdventureWorks2019.bak';
+
+exec msdb.dbo.rds_task_status @task_id=2;
+
+exec msdb.dbo.rds_backup_database
+@source_db_name='AdventureWorks',
+@s3_arn_to_backup_to='arn:aws:s3:::lab-aws-sql-server/AdventureWorks2022-alterado.bak';
+
+exec msdb.dbo.rds_task_status @task_id=3;
+
+alterar algum valor de tabela
+realizar backup para s3
+copiar de volta
+copiar para container
+restaurar no container
+
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/SQLServer.Procedural.Importing.html
+
+user data:
+
+#!/bin/bash
+
+#Instalar Docker e Git
+sudo yum update -y
+sudo yum install git -y
+sudo yum install docker -y
+sudo usermod -a -G docker ec2-user
+sudo usermod -a -G docker ssm-user
+id ec2-user ssm-user
+sudo newgrp docker
+
+#Ativar docker
+sudo systemctl enable docker.service
+sudo systemctl start docker.service
+
+#Instalar docker compose 2
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+

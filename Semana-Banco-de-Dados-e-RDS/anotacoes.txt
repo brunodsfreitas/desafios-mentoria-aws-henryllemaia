@@ -113,3 +113,19 @@ sudo mkdir -p /usr/local/lib/docker/cli-plugins
 sudo curl -SL https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
 sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
+----------------
+desafio 3
+
+*Configurar acesso de forma privada para o RDS usando Bastion Host, automatizando o processo de ligar o porteiro*
+
+Aprendizados:
+Acesso via SSM:
+- precisa do agent na instancia
+- precisa de plugin no computador que realizará a conexão
+- o usuário precisa de roles de acesso ssm
+- a instancia precisa de role de ssm
+- dá pra realizar tunnel
+	
+aws ssm start-session --target ID_INSTANCIA -t -L 8080:localhost:80
+
+Colocando uma máquina linux EC2 para servir como ponto de acesso e tunnel, permitindo acesso a recursos;

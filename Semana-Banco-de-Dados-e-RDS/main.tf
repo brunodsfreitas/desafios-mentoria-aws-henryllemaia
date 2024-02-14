@@ -16,7 +16,7 @@ provider "aws" {
 
 # VPC
 resource "aws_vpc" "lab-aws-2024-tf" {
-  cidr_block = "10.1.1.0/24"
+  cidr_block = "10.1.0.0/16"
   enable_dns_support = true
   enable_dns_hostnames = true
   tags = {
@@ -25,7 +25,7 @@ resource "aws_vpc" "lab-aws-2024-tf" {
   }
 }
 
-#route table
+#route table 1
 resource "aws_default_route_table" "lab-aws-2024-tf-subnet-public1-AZ1-route-table" {
   default_route_table_id = aws_vpc.lab-aws-2024-tf.default_route_table_id
 
@@ -40,7 +40,8 @@ resource "aws_default_route_table" "lab-aws-2024-tf-subnet-public1-AZ1-route-tab
   }
 }
 
-#internet gateway
+
+#internet gateway 1
 resource "aws_internet_gateway" "lab-aws-2024-tf-igw1" {
   vpc_id = aws_vpc.lab-aws-2024-tf.id
   tags = {
@@ -64,6 +65,28 @@ resource "aws_subnet" "lab-aws-2024-tf-subnet-private1-AZ1" {
   vpc_id              	= aws_vpc.lab-aws-2024-tf.id
   cidr_block          	= "10.1.1.128/25"
   availability_zone   	= var.AZ_location
+  map_public_ip_on_launch = false
+  tags = {
+    laboratorio-tf = "2024"
+  }
+}
+
+# Subnets
+resource "aws_subnet" "lab-aws-2024-tf-subnet-public1-AZ2" {
+  vpc_id              	= aws_vpc.lab-aws-2024-tf.id
+  cidr_block          	= "10.1.2.0/25"
+  availability_zone   	= var.AZ2_location
+  map_public_ip_on_launch = true
+  tags = {
+    laboratorio-tf = "2024"
+  }
+}
+
+# Subnets
+resource "aws_subnet" "lab-aws-2024-tf-subnet-private1-AZ2" {
+  vpc_id              	= aws_vpc.lab-aws-2024-tf.id
+  cidr_block          	= "10.1.2.128/25"
+  availability_zone   	= var.AZ2_location
   map_public_ip_on_launch = false
   tags = {
     laboratorio-tf = "2024"
@@ -121,8 +144,8 @@ resource "aws_security_group" "lab-aws-2024-tf-sg-default" {
   }
 }
 
-
-resource "aws_instance" "lab-test-1" {
+# EC2 Instance
+resource "aws_instance" "lab-aws-2024-tf-porteiro" {
     ami= "ami-0c20d88b0021158c6"
     instance_type           = "t2.micro"
     subnet_id               = aws_subnet.lab-aws-2024-tf-subnet-public1-AZ1.id
@@ -130,10 +153,9 @@ resource "aws_instance" "lab-test-1" {
     key_name                = var.keypair01
     tags                    = {
                             laboratorio-tf = "2024"
-                            Name = "lab-aws-2024-tf-test-1"
+                            Name = "lab-aws-2024-tf-porteiro"
                             }   
     iam_instance_profile = "role-acesso-ssm"
-    
 }
 
 #resource "aws_instance" "lab-test-2" {

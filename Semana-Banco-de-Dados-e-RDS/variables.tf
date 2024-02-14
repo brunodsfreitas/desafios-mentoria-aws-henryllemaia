@@ -1,6 +1,11 @@
 variable "AZ_location" {
   type = string
-  description = "Localizacao da zona de disponibilidade"
+  description = "Localizacao da zona de disponibilidade A"
+}
+
+variable "AZ2_location" {
+  type = string
+  description = "Localizacao da zona de disponibilidade B"
 }
 
 variable "region" {

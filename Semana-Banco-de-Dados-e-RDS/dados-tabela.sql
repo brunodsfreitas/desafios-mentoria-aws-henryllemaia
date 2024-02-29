@@ -26,3 +26,5 @@ INSERT INTO got_cidades (nome, familia_pertence, nome_do_rei) VALUES
 ('Astapor', 'None', 'None'),
 ('Yunkai', 'None', 'None'),
 ('Qarth', 'None', 'None');
+
+select * from got_cidades

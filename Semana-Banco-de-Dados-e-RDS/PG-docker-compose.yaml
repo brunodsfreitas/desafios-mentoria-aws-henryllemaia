@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:15.5-bullseye
     container_name: postgres_container
     ports:
       - "5432:5432"
@@ -12,3 +12,10 @@ services:
       POSTGRES_PASSWORD: winteriscoming
     volumes:
       - '${PWD}/pg-data:/var/lib/postgresql/data'
+  app:
+    container_name: app_container
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    ports:
+      - "8080:80"

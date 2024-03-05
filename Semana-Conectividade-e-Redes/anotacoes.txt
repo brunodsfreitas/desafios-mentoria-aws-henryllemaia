@@ -1,0 +1,6 @@
+* Nat Gateway
+
+* EC2 + VPC + SSH + SSM + INSTANCE-CONNECT
+
+* VPC
+* VPC Endpoint + SSM + EC2 INSTANCE-CONNECT

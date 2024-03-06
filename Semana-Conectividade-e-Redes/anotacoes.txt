@@ -4,3 +4,7 @@
 
 * VPC
 * VPC Endpoint + SSM + EC2 INSTANCE-CONNECT
+
+
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway
+https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/private-nat-gateway.html

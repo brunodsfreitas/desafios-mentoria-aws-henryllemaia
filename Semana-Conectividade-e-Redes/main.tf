@@ -120,6 +120,38 @@ resource "aws_default_network_acl" "lab-aws-redes-A-tf-nacl-default" {
   }
 }
 
+#Internet Gateway
+resource "aws_internet_gateway" "lab-aws-redes-A-tf-IGW" {
+  vpc_id = aws_vpc.lab-aws-redes-A-tf.id
+
+  tags = {
+    environment = var.environment
+    Name = "lab-aws-redes-A-tf-IGW"
+  }
+}
+
+#ENI interface
+resource "aws_network_interface" "lab-aws-redes-A-tf-ENI-1" {
+  subnet_id       = aws_subnet.lab-aws-redes-A-tf-subnet2-AZ1-private.id
+  security_groups = [aws_security_group.lab-aws-redes-A-tf-sg-default.id]
+
+  tags = {
+    environment = var.environment
+    Name = "lab-aws-redes-A-tf-ENI-1"
+  }
+}
+
+#NAT Gateway
+resource "aws_nat_gateway" "lab-aws-redes-A-tf-NGW" {
+  connectivity_type = "private"
+  subnet_id         = aws_subnet.lab-aws-redes-A-tf-subnet2-AZ1-private.id
+}
+
+######################################################################
+######################################################################
+######################################################################
+
+
 # VPC2
 resource "aws_vpc" "lab-aws-redes-B-tf" {
   cidr_block = var.CIDR2_blocks_A
@@ -226,6 +258,15 @@ resource "aws_default_network_acl" "lab-aws-redes-B-tf-nacl-default" {
   }
 }
 
+#Internet Gateway
+resource "aws_internet_gateway" "lab-aws-redes-B-tf-IGW" {
+  vpc_id = aws_vpc.lab-aws-redes-B-tf.id
+
+  tags = {
+    Name = "lab-aws-redes-B-tf-IGW"
+  }
+}
+
 # Security Group
 resource "aws_security_group" "lab-aws-redes-A-tf-sg-default" {
   name    	= "lab-aws-redes-tf Default"
@@ -250,31 +291,32 @@ resource "aws_security_group" "lab-aws-redes-A-tf-sg-default" {
   }
 }
 
-# Criando o Peering
-
+#Peering
 resource "aws_vpc_peering_connection" "vpc_peering" {
   peer_vpc_id = aws_vpc.lab-aws-redes-B-tf.id
   vpc_id = aws_vpc.lab-aws-redes-A-tf.id
-
-  # Aceitar automaticamente o peering do outro lado
   auto_accept = true
 }
 
 # Adicionando rotas nas tabelas de roteamento das VPCs
 
-# Na VPC 1
+#Add routes on route_table 
 resource "aws_route" "route_to_lab-aws-redes-B-tf" {
   route_table_id         = aws_vpc.lab-aws-redes-A-tf.default_route_table_id
   destination_cidr_block = aws_vpc.lab-aws-redes-B-tf.cidr_block
   vpc_peering_connection_id = aws_vpc_peering_connection.vpc_peering.id
 }
 
-# Na VPC 2
+#Add routes on route_table
 resource "aws_route" "route_to_lab-aws-redes-A-tf" {
   route_table_id         = aws_vpc.lab-aws-redes-B-tf.default_route_table_id
   destination_cidr_block = aws_vpc.lab-aws-redes-A-tf.cidr_block
   vpc_peering_connection_id = aws_vpc_peering_connection.vpc_peering.id
 }
+
+
+
+
 
 # EC2 Instance
 resource "aws_instance" "lab-aws-redes-A-tf-ec2" {

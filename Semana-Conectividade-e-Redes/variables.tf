@@ -72,3 +72,4 @@ variable "keypair01" {
   type = string
   description = "keypair para acesso VM"
 }
+

@@ -1,6 +1,7 @@
 region = "us-east-2" #ex: us-east-2
 keypair01 = "laboratorio-aws-2024-keys"
 environment = "Semana-Redes-Desafio-01"
+
 CIDR_blocks_A = "10.50.0.0/16"
 CIDR_blocks_A_sub1 = "10.50.1.0/24"
 CIDR_blocks_A_sub2 = "10.50.2.0/24"

@@ -2,11 +2,11 @@ terraform {
     required_providers {
         aws = {
             source = "hashicorp/aws"
-            version = "~> 4.16"
+            version = "~> 5.39.1"
         }
     }
 
-    required_version = ">= 1.2.0"
+    required_version = ">= 1.7.0"
 }
 
 provider "aws" {
@@ -25,6 +25,14 @@ resource "aws_vpc" "lab-aws-redes-A-tf" {
   }
 }
 
+#internet gateway 1
+resource "aws_internet_gateway" "lab-aws-redes-A-tf-igw1" {
+  vpc_id = aws_vpc.lab-aws-redes-A-tf.id
+  tags = {
+    environment = var.environment
+  }
+}
+
 #route table 1
 resource "aws_default_route_table" "lab-aws-redes-A-tf-subnet1-AZ1-public-route-table" {
   default_route_table_id = aws_vpc.lab-aws-redes-A-tf.default_route_table_id
@@ -37,15 +45,6 @@ resource "aws_default_route_table" "lab-aws-redes-A-tf-subnet1-AZ1-public-route-
   tags = {
     environment = var.environment
     Name = "lab-aws-redes-A-tf-subnet1-AZ1-public-route-table"
-  }
-}
-
-
-#internet gateway 1
-resource "aws_internet_gateway" "lab-aws-redes-A-tf-igw1" {
-  vpc_id = aws_vpc.lab-aws-redes-A-tf.id
-  tags = {
-    environment = var.environment
   }
 }
 
@@ -120,20 +119,11 @@ resource "aws_default_network_acl" "lab-aws-redes-A-tf-nacl-default" {
   }
 }
 
-#Internet Gateway
-resource "aws_internet_gateway" "lab-aws-redes-A-tf-IGW" {
-  vpc_id = aws_vpc.lab-aws-redes-A-tf.id
-
-  tags = {
-    environment = var.environment
-    Name = "lab-aws-redes-A-tf-IGW"
-  }
-}
 
 #ENI interface
 resource "aws_network_interface" "lab-aws-redes-A-tf-ENI-1" {
   subnet_id       = aws_subnet.lab-aws-redes-A-tf-subnet2-AZ1-private.id
-  security_groups = [aws_security_group.lab-aws-redes-A-tf-sg-default.id]
+  security_groups = [aws_security_group.lab-aws-redes-tf-sg-default.id]
 
   tags = {
     environment = var.environment
@@ -163,7 +153,15 @@ resource "aws_vpc" "lab-aws-redes-B-tf" {
   }
 }
 
-#route table 1
+#internet gateway 1
+resource "aws_internet_gateway" "lab-aws-redes-B-tf-igw1" {
+  vpc_id = aws_vpc.lab-aws-redes-B-tf.id
+  tags = {
+    environment = var.environment
+  }
+}
+
+#route table 2
 resource "aws_default_route_table" "lab-aws-redes-B-tf-subnet1-AZ1-public-route-table" {
   default_route_table_id = aws_vpc.lab-aws-redes-B-tf.default_route_table_id
 
@@ -175,15 +173,6 @@ resource "aws_default_route_table" "lab-aws-redes-B-tf-subnet1-AZ1-public-route-
   tags = {
     environment = var.environment
     Name = "lab-aws-redes-B-tf-subnet1-AZ1-public-route-table"
-  }
-}
-
-
-#internet gateway 1
-resource "aws_internet_gateway" "lab-aws-redes-B-tf-igw1" {
-  vpc_id = aws_vpc.lab-aws-redes-B-tf.id
-  tags = {
-    environment = var.environment
   }
 }
 
@@ -258,17 +247,13 @@ resource "aws_default_network_acl" "lab-aws-redes-B-tf-nacl-default" {
   }
 }
 
-#Internet Gateway
-resource "aws_internet_gateway" "lab-aws-redes-B-tf-IGW" {
-  vpc_id = aws_vpc.lab-aws-redes-B-tf.id
 
-  tags = {
-    Name = "lab-aws-redes-B-tf-IGW"
-  }
-}
+######################################################################
+######################################################################
+######################################################################
 
 # Security Group
-resource "aws_security_group" "lab-aws-redes-A-tf-sg-default" {
+resource "aws_security_group" "lab-aws-redes-tf-sg-default" {
   name    	= "lab-aws-redes-tf Default"
   description = "Allow SSH inbound and all outbound traffic"
   vpc_id  	= aws_vpc.lab-aws-redes-A-tf.id
@@ -277,7 +262,7 @@ resource "aws_security_group" "lab-aws-redes-A-tf-sg-default" {
 	from_port   = 22
 	to_port 	= 22
 	protocol	= "tcp"
-	cidr_blocks = ["0.0.0.0/0"] #meu ip publico "187.73.197.21/32"
+	cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -318,18 +303,33 @@ resource "aws_route" "route_to_lab-aws-redes-A-tf" {
 
 
 
-# EC2 Instance
+#EC2 Instance
 resource "aws_instance" "lab-aws-redes-A-tf-ec2" {
     ami= "ami-0c20d88b0021158c6"
     instance_type           = "t2.micro"
     subnet_id               = aws_subnet.lab-aws-redes-A-tf-subnet1-AZ1-public.id
-    vpc_security_group_ids  = [aws_security_group.lab-aws-redes-A-tf-sg-default.id] 
+    vpc_security_group_ids  = [aws_security_group.lab-aws-redes-tf-sg-default.id] 
     key_name                = var.keypair01
     tags                    = {
                             environment = var.environment
                             Name = "lab-aws-redes-A-tf-ec2"
                             }   
     iam_instance_profile = "role-acesso-ssm"
+    user_data = <<-EOF
+#!/bin/bash
+sudo yum update -y  
+sudo yum install -y docker git
+sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo git clone https://github.com/henrylle/bia.git
+cd bia
+### ALTERAR CONFIGURACOES DE IP BANCO
+### RODAR MIGRATE
+### RODAR Build da aplicação
+###sudo docker-compose -f docker-compose.yaml up -d
+EOF
 }
 
 # EC2 Instance
@@ -337,11 +337,25 @@ resource "aws_instance" "lab-aws-redes-A2-tf-ec2" {
     ami= "ami-0c20d88b0021158c6"
     instance_type           = "t2.micro"
     subnet_id               = aws_subnet.lab-aws-redes-A-tf-subnet2-AZ1-private.id
-    vpc_security_group_ids  = [aws_security_group.lab-aws-redes-A-tf-sg-default.id] 
+    vpc_security_group_ids  = [aws_security_group.lab-aws-redes-tf-sg-default.id] 
     key_name                = var.keypair01
     tags                    = {
                             environment = var.environment
                             Name = "lab-aws-redes-A2-tf-ec2"
                             }   
     iam_instance_profile = "role-acesso-ssm"
+    user_data = <<-EOF
+#!/bin/bash
+sudo yum update -y  
+sudo yum install -y docker git
+sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo git clone https://github.com/henrylle/bia.git
+cd bia
+### RODAR Build do banco
+### ALTERAR CONFIGURACOES DE IP BANCO
+###sudo docker-compose -f docker-compose.yaml up -d
+EOF
 }

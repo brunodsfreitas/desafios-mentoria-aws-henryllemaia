@@ -1,75 +1,75 @@
 variable "environment" {
-  type = string
+  type        = string
   description = "Ambiente"
 }
 
 variable "CIDR_blocks_A" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR_blocks_A_sub1" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR_blocks_A_sub2" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR_blocks_B" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR_blocks_B_sub1" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR_blocks_B_sub2" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR2_blocks_A" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR2_blocks_A_sub1" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR2_blocks_A_sub2" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR2_blocks_B" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR2_blocks_B_sub1" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "CIDR2_blocks_B_sub2" {
-  type = string
+  type        = string
   description = "CIDR rede"
 }
 
 variable "region" {
-  type = string
+  type        = string
   description = "Localizacao da regiao"
 }
 
 variable "keypair01" {
-  type = string
+  type        = string
   description = "keypair para acesso VM"
 }
 

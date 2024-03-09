@@ -5,6 +5,47 @@
 * VPC
 * VPC Endpoint + SSM + EC2 INSTANCE-CONNECT
 
+#!/bin/bash
+echo "ECS_CLUSTER=MyCluster" >> /etc/ecs/ecs.config
+
 
 https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway
 https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/private-nat-gateway.html
+
+
+
+https://github.com/e2eSolutionArchitect/terraform/tree/9a65103d9a66871f2d929fb1eef5d8670438a2b2/providers/aws/projects/e2esa-aws-ec2-autoscaling
+
+https://github.com/e2eSolutionArchitect/terraform/blob/main/docs/terraform-docs-generator.md
+
+
+https://github.com/pcasteran/terraform-graph-beautifier
+terraform graph | docker run --rm -i --name terraform-graph-beautifier  ghcr.io/pcasteran/terraform-graph-beautifier:latest-linux --output-type=cyto-html > config.html
+
+variable "vpc_cidr_block" {
+  type        = string
+  description = "CIDR block for the VPC"
+  validation {
+    condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$", var.vpc_cidr_block))
+    error_message = "Invalid VPC CIDR block."
+  }
+}
+
+variable "mycidr" {
+  type = map
+  default = {
+    subneta = "10.0.1.0/24"
+    subnetb = "10.0.2.0/24"
+  }
+}
+  cidr_block = var.mycidr["subnetb"]
+
+
+  aws_ecs_cluster
+  aws_instance
+  aws_ecs_task_definition
+  aws_ecs_service
+
+  aws_launch_template
+  aws_autoscaling_group
+

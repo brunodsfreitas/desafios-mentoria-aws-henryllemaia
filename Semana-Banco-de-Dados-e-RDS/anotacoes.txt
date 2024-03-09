@@ -129,3 +129,6 @@ Acesso via SSM:
 aws ssm start-session --target ID_INSTANCIA -t -L 8080:localhost:80
 
 Colocando uma máquina linux EC2 para servir como ponto de acesso e tunnel, permitindo acesso a recursos;
+
+
+fazer fix da tabela de rota das subnet publica e privada

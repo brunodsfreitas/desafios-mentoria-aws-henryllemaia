@@ -1,0 +1,983 @@
+# module.ecrRepo.aws_ecr_repository.lab_semana_conectividade:
+resource "aws_ecr_repository" "lab_semana_conectividade" {
+    arn                  = "arn:aws:ecr:us-east-2:993087404463:repository/lab_semana_conectividade"
+    id                   = "lab_semana_conectividade"
+    image_tag_mutability = "MUTABLE"
+    name                 = "lab_semana_conectividade"
+    registry_id          = "993087404463"
+    repository_url       = "993087404463.dkr.ecr.us-east-2.amazonaws.com/lab_semana_conectividade"
+    tags                 = {}
+    tags_all             = {}
+
+    encryption_configuration {
+        encryption_type = "AES256"
+    }
+
+    image_scanning_configuration {
+        scan_on_push = false
+    }
+}
+# module.ecsCluster.data.aws_iam_policy_document.assume_role_policy:
+data "aws_iam_policy_document" "assume_role_policy" {
+    id      = "1077804475"
+    json    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "ecs-tasks.amazonaws.com"
+                    }
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    version = "2012-10-17"
+
+    statement {
+        actions       = [
+            "sts:AssumeRole",
+        ]
+        effect        = "Allow"
+        not_actions   = []
+        not_resources = []
+        resources     = []
+
+        principals {
+            identifiers = [
+                "ecs-tasks.amazonaws.com",
+            ]
+            type        = "Service"
+        }
+    }
+}
+
+# module.ecsCluster.aws_alb.bia_load_balancer:
+resource "aws_alb" "bia_load_balancer" {
+    arn                                         = "arn:aws:elasticloadbalancing:us-east-2:993087404463:loadbalancer/app/ALB-BIA/42fc29df46fd3fbf"
+    arn_suffix                                  = "app/ALB-BIA/42fc29df46fd3fbf"
+    desync_mitigation_mode                      = "defensive"
+    dns_name                                    = "ALB-BIA-1475304079.us-east-2.elb.amazonaws.com"
+    drop_invalid_header_fields                  = false
+    enable_cross_zone_load_balancing            = true
+    enable_deletion_protection                  = false
+    enable_http2                                = true
+    enable_tls_version_and_cipher_suite_headers = false
+    enable_waf_fail_open                        = false
+    enable_xff_client_port                      = false
+    id                                          = "arn:aws:elasticloadbalancing:us-east-2:993087404463:loadbalancer/app/ALB-BIA/42fc29df46fd3fbf"
+    idle_timeout                                = 60
+    internal                                    = false
+    ip_address_type                             = "ipv4"
+    load_balancer_type                          = "application"
+    name                                        = "ALB-BIA"
+    preserve_host_header                        = false
+    security_groups                             = [
+        "sg-09573288eac42b7ee",
+    ]
+    subnets                                     = [
+        "subnet-0077a33633c34ba25",
+        "subnet-0726ad96865c796b2",
+    ]
+    tags                                        = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all                                    = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                                      = "vpc-08f9b248d46803ff1"
+    xff_header_processing_mode                  = "append"
+    zone_id                                     = "Z3AADJGX6KTTL2"
+
+    access_logs {
+        enabled = false
+    }
+
+    connection_logs {
+        enabled = false
+    }
+
+    subnet_mapping {
+        subnet_id = "subnet-0077a33633c34ba25"
+    }
+    subnet_mapping {
+        subnet_id = "subnet-0726ad96865c796b2"
+    }
+}
+
+# module.ecsCluster.aws_autoscaling_group.this:
+resource "aws_autoscaling_group" "this" {
+    arn                              = "arn:aws:autoscaling:us-east-2:993087404463:autoScalingGroup:7a8d8f2b-1998-433a-b567-1aa27c1f8063:autoScalingGroupName/SemanaConectividadeAWS-asg"
+    availability_zones               = [
+        "us-east-2a",
+        "us-east-2b",
+    ]
+    capacity_rebalance               = false
+    default_cooldown                 = 300
+    default_instance_warmup          = 0
+    desired_capacity                 = 1
+    enabled_metrics                  = [
+        "GroupDesiredCapacity",
+        "GroupInServiceInstances",
+        "GroupMaxSize",
+        "GroupMinSize",
+        "GroupTotalInstances",
+    ]
+    force_delete                     = false
+    force_delete_warm_pool           = false
+    health_check_grace_period        = 300
+    health_check_type                = "ELB"
+    id                               = "SemanaConectividadeAWS-asg"
+    ignore_failed_scaling_activities = false
+    load_balancers                   = []
+    max_instance_lifetime            = 0
+    max_size                         = 2
+    metrics_granularity              = "1Minute"
+    min_size                         = 1
+    name                             = "SemanaConectividadeAWS-asg"
+    predicted_capacity               = 0
+    protect_from_scale_in            = false
+    service_linked_role_arn          = "arn:aws:iam::993087404463:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+    suspended_processes              = []
+    target_group_arns                = [
+        "arn:aws:elasticloadbalancing:us-east-2:993087404463:targetgroup/TG-BIA/880c0ef3ad8a9f6f",
+    ]
+    termination_policies             = []
+    vpc_zone_identifier              = [
+        "subnet-0077a33633c34ba25",
+        "subnet-0726ad96865c796b2",
+    ]
+    wait_for_capacity_timeout        = "10m"
+    warm_pool_size                   = 0
+
+    launch_template {
+        id      = "lt-0963701dae2d21b3e"
+        name    = "SemanaConectividadeAWS-tpl"
+        version = "4"
+    }
+
+    traffic_source {
+        identifier = "arn:aws:elasticloadbalancing:us-east-2:993087404463:targetgroup/TG-BIA/880c0ef3ad8a9f6f"
+        type       = "elbv2"
+    }
+}
+
+# module.ecsCluster.aws_default_network_acl.lab_conectividade_bia-tf-nacl-default:
+resource "aws_default_network_acl" "lab_conectividade_bia-tf-nacl-default" {
+    arn                    = "arn:aws:ec2:us-east-2:993087404463:network-acl/acl-07063337ea045d5d2"
+    default_network_acl_id = "acl-07063337ea045d5d2"
+    id                     = "acl-07063337ea045d5d2"
+    owner_id               = "993087404463"
+    subnet_ids             = []
+    tags                   = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all               = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                 = "vpc-08f9b248d46803ff1"
+
+    egress {
+        action     = "allow"
+        cidr_block = "0.0.0.0/0"
+        from_port  = 0
+        icmp_code  = 0
+        icmp_type  = 0
+        protocol   = "-1"
+        rule_no    = 100
+        to_port    = 0
+    }
+
+    ingress {
+        action     = "allow"
+        cidr_block = "0.0.0.0/0"
+        from_port  = 0
+        icmp_code  = 0
+        icmp_type  = 0
+        protocol   = "-1"
+        rule_no    = 100
+        to_port    = 0
+    }
+}
+
+# module.ecsCluster.aws_default_route_table.lab_conectividade_bia-tf-subnet1-AZ1-public-route-table:
+resource "aws_default_route_table" "lab_conectividade_bia-tf-subnet1-AZ1-public-route-table" {
+    arn                    = "arn:aws:ec2:us-east-2:993087404463:route-table/rtb-06b3144fe820a325d"
+    default_route_table_id = "rtb-06b3144fe820a325d"
+    id                     = "rtb-06b3144fe820a325d"
+    owner_id               = "993087404463"
+    propagating_vgws       = []
+    route                  = [
+        {
+            cidr_block                 = "0.0.0.0/0"
+            core_network_arn           = ""
+            destination_prefix_list_id = ""
+            egress_only_gateway_id     = ""
+            gateway_id                 = "igw-082e694c9add2e24d"
+            instance_id                = ""
+            ipv6_cidr_block            = ""
+            nat_gateway_id             = ""
+            network_interface_id       = ""
+            transit_gateway_id         = ""
+            vpc_endpoint_id            = ""
+            vpc_peering_connection_id  = ""
+        },
+    ]
+    tags                   = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all               = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                 = "vpc-08f9b248d46803ff1"
+}
+
+# module.ecsCluster.aws_ecs_cluster.lab_conectividade_bia_app_cluster:
+resource "aws_ecs_cluster" "lab_conectividade_bia_app_cluster" {
+    arn      = "arn:aws:ecs:us-east-2:993087404463:cluster/lab-bia-cluster"
+    id       = "arn:aws:ecs:us-east-2:993087404463:cluster/lab-bia-cluster"
+    name     = "lab-bia-cluster"
+    tags     = {
+        "Name"         = "SemanaConectividadeAWS-vpc"
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all = {
+        "Name"         = "SemanaConectividadeAWS-vpc"
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+
+    setting {
+        name  = "containerInsights"
+        value = "disabled"
+    }
+}
+
+# module.ecsCluster.aws_ecs_task_definition.bia_app_task:
+resource "aws_ecs_task_definition" "bia_app_task" {
+    arn                      = "arn:aws:ecs:us-east-2:993087404463:task-definition/bia-task:4"
+    arn_without_revision     = "arn:aws:ecs:us-east-2:993087404463:task-definition/bia-task"
+    container_definitions    = jsonencode(
+        [
+            {
+                cpu            = 256
+                environment    = []
+                essential      = true
+                image          = "993087404463.dkr.ecr.us-east-2.amazonaws.com/lab_semana_conectividade"
+                memory         = 512
+                mountPoints    = []
+                name           = "bia-task"
+                portMappings   = [
+                    {
+                        containerPort = 3001
+                        hostPort      = 3001
+                        protocol      = "tcp"
+                    },
+                ]
+                systemControls = []
+                volumesFrom    = []
+            },
+        ]
+    )
+    cpu                      = "256"
+    execution_role_arn       = "arn:aws:iam::993087404463:role/bia-task-definition-role"
+    family                   = "bia-task"
+    id                       = "bia-task"
+    memory                   = "512"
+    network_mode             = "bridge"
+    requires_compatibilities = [
+        "EC2",
+    ]
+    revision                 = 4
+    skip_destroy             = false
+    tags                     = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all                 = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    track_latest             = false
+}
+
+# module.ecsCluster.aws_iam_role.ecs_task_execution_role:
+resource "aws_iam_role" "ecs_task_execution_role" {
+    arn                   = "arn:aws:iam::993087404463:role/bia-task-definition-role"
+    assume_role_policy    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "ecs-tasks.amazonaws.com"
+                    }
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    create_date           = "2024-03-08T02:35:24Z"
+    force_detach_policies = false
+    id                    = "bia-task-definition-role"
+    managed_policy_arns   = [
+        "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+    ]
+    max_session_duration  = 3600
+    name                  = "bia-task-definition-role"
+    path                  = "/"
+    tags                  = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all              = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    unique_id             = "AROA6OOE7HGX5EPIS6VTH"
+}
+
+# module.ecsCluster.aws_iam_role_policy_attachment.ecs_task_execution_role_policy:
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+    id         = "bia-task-definition-role-20240308023523882900000001"
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+    role       = "bia-task-definition-role"
+}
+
+# module.ecsCluster.aws_internet_gateway.lab_conectividade_bia-tf-igw1:
+resource "aws_internet_gateway" "lab_conectividade_bia-tf-igw1" {
+    arn      = "arn:aws:ec2:us-east-2:993087404463:internet-gateway/igw-082e694c9add2e24d"
+    id       = "igw-082e694c9add2e24d"
+    owner_id = "993087404463"
+    tags     = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id   = "vpc-08f9b248d46803ff1"
+}
+
+# module.ecsCluster.aws_launch_template.this:
+resource "aws_launch_template" "this" {
+    arn                     = "arn:aws:ec2:us-east-2:993087404463:launch-template/lt-0963701dae2d21b3e"
+    default_version         = 1
+    disable_api_stop        = false
+    disable_api_termination = false
+    id                      = "lt-0963701dae2d21b3e"
+    image_id                = "ami-0c20d88b0021158c6"
+    instance_type           = "t2.micro"
+    key_name                = "laboratorio-aws-2024-keys"
+    latest_version          = 4
+    name                    = "SemanaConectividadeAWS-tpl"
+    security_group_names    = [
+        "terraform-20240308024325172300000001",
+    ]
+    tags                    = {}
+    tags_all                = {}
+    user_data               = "IyEvYmluL2Jhc2gKZWNobyAiRUNTX0NMVVNURVI9bGFiLWJpYS1jbHVzdGVyIiA+PiAvZXRjL2Vjcy9lY3MuY29uZmln"
+    vpc_security_group_ids  = []
+
+    iam_instance_profile {
+        name = "role-acesso-ssm"
+    }
+
+    tag_specifications {
+        resource_type = "instance"
+        tags          = {
+            "ResourceName" = "SemanaConectividadeAWS-tpl"
+            "appid"        = "01.01"
+            "appname"      = "ClusterBia"
+            "businessunit" = "Matriz"
+            "costcenter"   = "estudos"
+            "createdby"    = "BrunoFreitas"
+            "createdon"    = "2024-03-08T00:40:22Z"
+            "desc"         = "ECS com EC2 com NatGateway"
+            "orgunit"      = "Desafio1"
+            "project"      = "SemanaConectividadeAWS"
+            "tier"         = "developer"
+        }
+    }
+}
+
+# module.ecsCluster.aws_lb_listener.listener80:
+resource "aws_lb_listener" "listener80" {
+    arn               = "arn:aws:elasticloadbalancing:us-east-2:993087404463:listener/app/ALB-BIA/42fc29df46fd3fbf/3fef10009a7c26ce"
+    id                = "arn:aws:elasticloadbalancing:us-east-2:993087404463:listener/app/ALB-BIA/42fc29df46fd3fbf/3fef10009a7c26ce"
+    load_balancer_arn = "arn:aws:elasticloadbalancing:us-east-2:993087404463:loadbalancer/app/ALB-BIA/42fc29df46fd3fbf"
+    port              = 80
+    protocol          = "HTTP"
+    tags              = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all          = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+
+    default_action {
+        order            = 1
+        target_group_arn = "arn:aws:elasticloadbalancing:us-east-2:993087404463:targetgroup/TG-BIA/880c0ef3ad8a9f6f"
+        type             = "forward"
+    }
+}
+
+# module.ecsCluster.aws_lb_target_group.tg_bia:
+resource "aws_lb_target_group" "tg_bia" {
+    arn                                = "arn:aws:elasticloadbalancing:us-east-2:993087404463:targetgroup/TG-BIA/880c0ef3ad8a9f6f"
+    arn_suffix                         = "targetgroup/TG-BIA/880c0ef3ad8a9f6f"
+    deregistration_delay               = "300"
+    id                                 = "arn:aws:elasticloadbalancing:us-east-2:993087404463:targetgroup/TG-BIA/880c0ef3ad8a9f6f"
+    ip_address_type                    = "ipv4"
+    lambda_multi_value_headers_enabled = false
+    load_balancer_arns                 = [
+        "arn:aws:elasticloadbalancing:us-east-2:993087404463:loadbalancer/app/ALB-BIA/42fc29df46fd3fbf",
+    ]
+    load_balancing_algorithm_type      = "round_robin"
+    load_balancing_anomaly_mitigation  = "off"
+    load_balancing_cross_zone_enabled  = "use_load_balancer_configuration"
+    name                               = "TG-BIA"
+    port                               = 3001
+    protocol                           = "HTTP"
+    protocol_version                   = "HTTP1"
+    proxy_protocol_v2                  = false
+    slow_start                         = 0
+    tags                               = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all                           = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    target_type                        = "instance"
+    vpc_id                             = "vpc-08f9b248d46803ff1"
+
+    health_check {
+        enabled             = true
+        healthy_threshold   = 5
+        interval            = 30
+        matcher             = "200"
+        path                = "/"
+        port                = "traffic-port"
+        protocol            = "HTTP"
+        timeout             = 5
+        unhealthy_threshold = 2
+    }
+
+    stickiness {
+        cookie_duration = 86400
+        enabled         = false
+        type            = "lb_cookie"
+    }
+
+    target_failover {}
+
+    target_health_state {}
+}
+
+# module.ecsCluster.aws_security_group.sg_load_balancer:
+resource "aws_security_group" "sg_load_balancer" {
+    arn                    = "arn:aws:ec2:us-east-2:993087404463:security-group/sg-09573288eac42b7ee"
+    description            = "sg_load_balancer"
+    egress                 = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = ""
+            from_port        = 0
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    id                     = "sg-09573288eac42b7ee"
+    ingress                = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = ""
+            from_port        = 80
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 80
+        },
+    ]
+    name                   = "terraform-20240308023535502000000002"
+    name_prefix            = "terraform-"
+    owner_id               = "993087404463"
+    revoke_rules_on_delete = false
+    tags                   = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all               = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                 = "vpc-08f9b248d46803ff1"
+}
+
+# module.ecsCluster.aws_security_group.sg_service:
+resource "aws_security_group" "sg_service" {
+    arn                    = "arn:aws:ec2:us-east-2:993087404463:security-group/sg-0c88551f57bdd233e"
+    description            = "sg_service"
+    egress                 = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = ""
+            from_port        = 0
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    id                     = "sg-0c88551f57bdd233e"
+    ingress                = [
+        {
+            cidr_blocks      = []
+            description      = ""
+            from_port        = 0
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    name                   = "terraform-20240308024325172300000001"
+    name_prefix            = "terraform-"
+    owner_id               = "993087404463"
+    revoke_rules_on_delete = false
+    tags                   = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all               = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                 = "vpc-08f9b248d46803ff1"
+}
+
+# module.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet1-AZ1-public:
+resource "aws_subnet" "lab_conectividade_bia-tf-subnet1-AZ1-public" {
+    arn                                            = "arn:aws:ec2:us-east-2:993087404463:subnet/subnet-0726ad96865c796b2"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-2a"
+    availability_zone_id                           = "use2-az1"
+    cidr_block                                     = "10.50.10.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-0726ad96865c796b2"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = true
+    owner_id                                       = "993087404463"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all                                       = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                                         = "vpc-08f9b248d46803ff1"
+}
+
+# module.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet1-AZ2-public:
+resource "aws_subnet" "lab_conectividade_bia-tf-subnet1-AZ2-public" {
+    arn                                            = "arn:aws:ec2:us-east-2:993087404463:subnet/subnet-0077a33633c34ba25"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-2b"
+    availability_zone_id                           = "use2-az2"
+    cidr_block                                     = "10.50.110.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-0077a33633c34ba25"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = true
+    owner_id                                       = "993087404463"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all                                       = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                                         = "vpc-08f9b248d46803ff1"
+}
+
+# module.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet2-AZ1-private:
+resource "aws_subnet" "lab_conectividade_bia-tf-subnet2-AZ1-private" {
+    arn                                            = "arn:aws:ec2:us-east-2:993087404463:subnet/subnet-078d76cf138e46fd3"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-2a"
+    availability_zone_id                           = "use2-az1"
+    cidr_block                                     = "10.50.20.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-078d76cf138e46fd3"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = false
+    owner_id                                       = "993087404463"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all                                       = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                                         = "vpc-08f9b248d46803ff1"
+}
+
+# module.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet2-AZ2-private:
+resource "aws_subnet" "lab_conectividade_bia-tf-subnet2-AZ2-private" {
+    arn                                            = "arn:aws:ec2:us-east-2:993087404463:subnet/subnet-0de2b7d2ddb6b73a2"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-2b"
+    availability_zone_id                           = "use2-az2"
+    cidr_block                                     = "10.50.220.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-0de2b7d2ddb6b73a2"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = false
+    owner_id                                       = "993087404463"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all                                       = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    vpc_id                                         = "vpc-08f9b248d46803ff1"
+}
+
+# module.ecsCluster.aws_vpc.lab_conectividade_bia-tf:
+resource "aws_vpc" "lab_conectividade_bia-tf" {
+    arn                                  = "arn:aws:ec2:us-east-2:993087404463:vpc/vpc-08f9b248d46803ff1"
+    assign_generated_ipv6_cidr_block     = false
+    cidr_block                           = "10.50.0.0/16"
+    default_network_acl_id               = "acl-07063337ea045d5d2"
+    default_route_table_id               = "rtb-06b3144fe820a325d"
+    default_security_group_id            = "sg-02fda3ac8c5e498e9"
+    dhcp_options_id                      = "dopt-0ffa86c94271f7707"
+    enable_dns_hostnames                 = true
+    enable_dns_support                   = true
+    enable_network_address_usage_metrics = false
+    id                                   = "vpc-08f9b248d46803ff1"
+    instance_tenancy                     = "default"
+    ipv6_netmask_length                  = 0
+    main_route_table_id                  = "rtb-06b3144fe820a325d"
+    owner_id                             = "993087404463"
+    tags                                 = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+    tags_all                             = {
+        "appid"        = "01.01"
+        "appname"      = "ClusterBia"
+        "businessunit" = "Matriz"
+        "costcenter"   = "estudos"
+        "createdby"    = "BrunoFreitas"
+        "createdon"    = "2024-03-08T00:40:22Z"
+        "desc"         = "ECS com EC2 com NatGateway"
+        "orgunit"      = "Desafio1"
+        "project"      = "SemanaConectividadeAWS"
+        "tier"         = "developer"
+    }
+}

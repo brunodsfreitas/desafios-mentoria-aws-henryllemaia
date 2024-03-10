@@ -1,23 +1,23 @@
 [0m[1mmodule.ecsCluster.data.aws_iam_policy_document.assume_role_policy: Reading...[0m[0m
 [0m[1mmodule.ecrRepo.aws_ecr_repository.lab_semana_conectividade: Refreshing state... [id=lab_semana_conectividade][0m
-[0m[1mmodule.ecsCluster.aws_vpc.lab_conectividade_bia-tf: Refreshing state... [id=vpc-02d4cd7f878f8742f][0m
-[0m[1mmodule.ecsCluster.aws_ecs_cluster.lab_conectividade_bia_app_cluster: Refreshing state... [id=arn:aws:ecs:us-east-2:993087404463:cluster/lab-bia-cluster][0m
+[0m[1mmodule.ecsCluster.aws_vpc.this: Refreshing state... [id=vpc-02d4cd7f878f8742f][0m
+[0m[1mmodule.ecsCluster.aws_ecs_cluster.this: Refreshing state... [id=arn:aws:ecs:us-east-2:993087404463:cluster/lab-bia-cluster][0m
 [0m[1mmodule.ecsCluster.data.aws_iam_policy_document.assume_role_policy: Read complete after 0s [id=1077804475][0m
 [0m[1mmodule.ecsCluster.aws_iam_role.ecs_task_execution_role: Refreshing state... [id=bia-task-definition-role][0m
 [0m[1mmodule.ecsCluster.aws_iam_role_policy_attachment.ecs_task_execution_role_policy: Refreshing state... [id=bia-task-definition-role-20240309030547412900000001][0m
 [0m[1mmodule.ecsCluster.aws_ecs_task_definition.bia_app_task: Refreshing state... [id=bia-task][0m
-[0m[1mmodule.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet1-AZ1-public: Refreshing state... [id=subnet-03fe52cc69c9ec30a][0m
-[0m[1mmodule.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet2-AZ1-private: Refreshing state... [id=subnet-08de2ad47ecfd8274][0m
-[0m[1mmodule.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet1-AZ2-public: Refreshing state... [id=subnet-0766b1c80d77352b4][0m
+[0m[1mmodule.ecsCluster.aws_subnet.subnet1-AZ1-public: Refreshing state... [id=subnet-03fe52cc69c9ec30a][0m
+[0m[1mmodule.ecsCluster.aws_subnet.subnet2-AZ1-private: Refreshing state... [id=subnet-08de2ad47ecfd8274][0m
+[0m[1mmodule.ecsCluster.aws_subnet.subnet1-AZ2-public: Refreshing state... [id=subnet-0766b1c80d77352b4][0m
 [0m[1mmodule.ecsCluster.aws_security_group.sg_load_balancer: Refreshing state... [id=sg-081c8a51ea6021c19][0m
-[0m[1mmodule.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet2-AZ2-private: Refreshing state... [id=subnet-09565b34f5131f7c4][0m
-[0m[1mmodule.ecsCluster.aws_internet_gateway.lab_conectividade_bia-tf-igw1: Refreshing state... [id=igw-0a9d7eba79711c0e0][0m
-[0m[1mmodule.ecsCluster.aws_default_network_acl.lab_conectividade_bia-tf-nacl-default: Refreshing state... [id=acl-05d7cb52af71ba4ee][0m
+[0m[1mmodule.ecsCluster.aws_subnet.subnet2-AZ2-private: Refreshing state... [id=subnet-09565b34f5131f7c4][0m
+[0m[1mmodule.ecsCluster.aws_internet_gateway.igw1: Refreshing state... [id=igw-0a9d7eba79711c0e0][0m
+[0m[1mmodule.ecsCluster.aws_default_network_acl.this: Refreshing state... [id=acl-05d7cb52af71ba4ee][0m
 [0m[1mmodule.ecsCluster.aws_lb_target_group.tg_bia: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-2:993087404463:targetgroup/TG-BIA/2609b8b372c184cb][0m
 [0m[1mmodule.ecsCluster.aws_security_group.sg_service: Refreshing state... [id=sg-00912ebb17cf6b48d][0m
-[0m[1mmodule.ecsCluster.aws_default_route_table.lab_conectividade_bia-tf-subnet1-AZ1-public-route-table: Refreshing state... [id=rtb-0d10e7bd2c2d0e3f2][0m
+[0m[1mmodule.ecsCluster.aws_default_route_table.subnet1-AZ1-public-route-table: Refreshing state... [id=rtb-0d10e7bd2c2d0e3f2][0m
 [0m[1mmodule.ecsCluster.aws_launch_template.this: Refreshing state... [id=lt-06c9fa444ba8b90a8][0m
-[0m[1mmodule.ecsCluster.aws_alb.bia_load_balancer: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-2:993087404463:loadbalancer/app/ALB-BIA/fec01e0843c2c63c][0m
+[0m[1mmodule.ecsCluster.aws_alb.this: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-2:993087404463:loadbalancer/app/ALB-BIA/fec01e0843c2c63c][0m
 [0m[1mmodule.ecsCluster.aws_lb_listener.listener80: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-2:993087404463:listener/app/ALB-BIA/fec01e0843c2c63c/07f1e847e5e86d91][0m
 
 Terraform used the selected providers to generate the following execution
@@ -27,8 +27,8 @@ plan. Resource actions are indicated with the following symbols:
 
 Terraform will perform the following actions:
 
-[1m  # module.ecsCluster.aws_alb.bia_load_balancer[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_alb" "bia_load_balancer" {
+[1m  # module.ecsCluster.aws_alb.this[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_alb" "this" {
         id                                          = "arn:aws:elasticloadbalancing:us-east-2:993087404463:loadbalancer/app/ALB-BIA/fec01e0843c2c63c"
         name                                        = "ALB-BIA"
       [33m~[0m[0m tags                                        = {
@@ -96,8 +96,8 @@ Terraform will perform the following actions:
         }
     }
 
-[1m  # module.ecsCluster.aws_default_network_acl.lab_conectividade_bia-tf-nacl-default[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_default_network_acl" "lab_conectividade_bia-tf-nacl-default" {
+[1m  # module.ecsCluster.aws_default_network_acl.this[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_default_network_acl" "this" {
         id                     = "acl-05d7cb52af71ba4ee"
       [33m~[0m[0m subnet_ids             = [
           [31m-[0m[0m "subnet-03fe52cc69c9ec30a",
@@ -134,8 +134,8 @@ Terraform will perform the following actions:
         [90m# (2 unchanged blocks hidden)[0m[0m
     }
 
-[1m  # module.ecsCluster.aws_default_route_table.lab_conectividade_bia-tf-subnet1-AZ1-public-route-table[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_default_route_table" "lab_conectividade_bia-tf-subnet1-AZ1-public-route-table" {
+[1m  # module.ecsCluster.aws_default_route_table.subnet1-AZ1-public-route-table[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_default_route_table" "subnet1-AZ1-public-route-table" {
         id                     = "rtb-0d10e7bd2c2d0e3f2"
       [33m~[0m[0m tags                   = {
           [31m-[0m[0m "appid"        = "01.01"
@@ -164,8 +164,8 @@ Terraform will perform the following actions:
         [90m# (6 unchanged attributes hidden)[0m[0m
     }
 
-[1m  # module.ecsCluster.aws_ecs_cluster.lab_conectividade_bia_app_cluster[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_ecs_cluster" "lab_conectividade_bia_app_cluster" {
+[1m  # module.ecsCluster.aws_ecs_cluster.this[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_ecs_cluster" "this" {
         id       = "arn:aws:ecs:us-east-2:993087404463:cluster/lab-bia-cluster"
         name     = "lab-bia-cluster"
       [33m~[0m[0m tags     = {
@@ -221,7 +221,7 @@ Terraform will perform the following actions:
 
       [32m+[0m[0m load_balancer {
           [32m+[0m[0m container_name   = "bia-task"
-          [32m+[0m[0m container_port   = 3001
+          [32m+[0m[0m application_container_port   = 3001
           [32m+[0m[0m target_group_arn = "arn:aws:elasticloadbalancing:us-east-2:993087404463:targetgroup/TG-BIA/2609b8b372c184cb"
         }
 
@@ -298,8 +298,8 @@ Terraform will perform the following actions:
         [90m# (8 unchanged attributes hidden)[0m[0m
     }
 
-[1m  # module.ecsCluster.aws_internet_gateway.lab_conectividade_bia-tf-igw1[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_internet_gateway" "lab_conectividade_bia-tf-igw1" {
+[1m  # module.ecsCluster.aws_internet_gateway.igw1[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_internet_gateway" "igw1" {
         id       = "igw-0a9d7eba79711c0e0"
       [33m~[0m[0m tags     = {
           [31m-[0m[0m "appid"        = "01.01"
@@ -496,8 +496,8 @@ Terraform will perform the following actions:
         [90m# (7 unchanged attributes hidden)[0m[0m
     }
 
-[1m  # module.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet1-AZ1-public[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_subnet" "lab_conectividade_bia-tf-subnet1-AZ1-public" {
+[1m  # module.ecsCluster.aws_subnet.subnet1-AZ1-public[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_subnet" "subnet1-AZ1-public" {
         id                                             = "subnet-03fe52cc69c9ec30a"
       [33m~[0m[0m tags                                           = {
           [31m-[0m[0m "appid"        = "01.01"
@@ -526,8 +526,8 @@ Terraform will perform the following actions:
         [90m# (15 unchanged attributes hidden)[0m[0m
     }
 
-[1m  # module.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet1-AZ2-public[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_subnet" "lab_conectividade_bia-tf-subnet1-AZ2-public" {
+[1m  # module.ecsCluster.aws_subnet.subnet1-AZ2-public[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_subnet" "subnet1-AZ2-public" {
         id                                             = "subnet-0766b1c80d77352b4"
       [33m~[0m[0m tags                                           = {
           [31m-[0m[0m "appid"        = "01.01"
@@ -556,8 +556,8 @@ Terraform will perform the following actions:
         [90m# (15 unchanged attributes hidden)[0m[0m
     }
 
-[1m  # module.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet2-AZ1-private[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_subnet" "lab_conectividade_bia-tf-subnet2-AZ1-private" {
+[1m  # module.ecsCluster.aws_subnet.subnet2-AZ1-private[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_subnet" "subnet2-AZ1-private" {
         id                                             = "subnet-08de2ad47ecfd8274"
       [33m~[0m[0m tags                                           = {
           [31m-[0m[0m "appid"        = "01.01"
@@ -586,8 +586,8 @@ Terraform will perform the following actions:
         [90m# (15 unchanged attributes hidden)[0m[0m
     }
 
-[1m  # module.ecsCluster.aws_subnet.lab_conectividade_bia-tf-subnet2-AZ2-private[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_subnet" "lab_conectividade_bia-tf-subnet2-AZ2-private" {
+[1m  # module.ecsCluster.aws_subnet.subnet2-AZ2-private[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_subnet" "subnet2-AZ2-private" {
         id                                             = "subnet-09565b34f5131f7c4"
       [33m~[0m[0m tags                                           = {
           [31m-[0m[0m "appid"        = "01.01"
@@ -616,8 +616,8 @@ Terraform will perform the following actions:
         [90m# (15 unchanged attributes hidden)[0m[0m
     }
 
-[1m  # module.ecsCluster.aws_vpc.lab_conectividade_bia-tf[0m will be updated in-place
-[0m  [33m~[0m[0m resource "aws_vpc" "lab_conectividade_bia-tf" {
+[1m  # module.ecsCluster.aws_vpc.this[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_vpc" "this" {
         id                                   = "vpc-02d4cd7f878f8742f"
       [33m~[0m[0m tags                                 = {
           [31m-[0m[0m "appid"        = "01.01"

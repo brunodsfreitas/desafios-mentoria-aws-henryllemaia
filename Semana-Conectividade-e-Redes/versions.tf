@@ -1,3 +1,5 @@
+# dev.tfvars - This file is associated with versions.tf
+
 terraform {
   required_version = ">= 1.7.0"
   required_providers {
@@ -9,6 +11,6 @@ terraform {
 }
 
 provider "aws" {
-  region  = local.region
-  profile = local.profile
+  region  = var.region
+  profile = var.profile
 }

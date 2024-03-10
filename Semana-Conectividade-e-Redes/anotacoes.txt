@@ -8,6 +8,8 @@
 #!/bin/bash
 echo "ECS_CLUSTER=MyCluster" >> /etc/ecs/ecs.config
 
+#user_data                      = filebase64("${path.module}/ec2-init.sh")
+
 
 https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway
 https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/private-nat-gateway.html
@@ -49,3 +51,5 @@ variable "mycidr" {
   aws_launch_template
   aws_autoscaling_group
 
+corrigir erro de rede
+comunicação entre containers

@@ -12,6 +12,7 @@ resource "aws_ecs_task_definition" "this" { #https://registry.terraform.io/provi
     {
         "name": "${var.td_task_name}",
         "image": "${var.ecr_repo_url}",
+        "hostname": "${var.service_name}",
         "essential": true,
         "portMappings": [
             {

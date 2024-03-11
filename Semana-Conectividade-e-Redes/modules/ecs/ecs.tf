@@ -6,11 +6,23 @@ resource "aws_vpc" "this" {
   tags                 = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
 }
 
+#Elastic IP
+resource "aws_eip" "eip_ngw1" {
+  domain = "vpc"
+}
+
 #internet gateway 1
 resource "aws_internet_gateway" "igw1" {
-  vpc_id = aws_vpc.this.id
-  tags   = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
-  depends_on = [ aws_vpc.this ]
+  vpc_id     = aws_vpc.this.id
+  tags       = merge({ "Name" = "${var.desc_tags.project}-igw1" }, var.desc_tags)
+  depends_on = [aws_vpc.this]
+}
+
+#nat gateway 1
+resource "aws_nat_gateway" "ngw1" {
+  allocation_id = aws_eip.eip_ngw1.id
+  subnet_id     = aws_subnet.subnet1-AZ1-public.id
+  tags          = merge({ "Name" = "${var.desc_tags.project}-ngw1" }, var.desc_tags)
 }
 
 #Route Table default
@@ -23,7 +35,7 @@ resource "aws_default_route_table" "subnet1-AZ1-public-route-table" {
 #Route Table publica
 resource "aws_route_table" "rt_public" {
   vpc_id = aws_vpc.this.id
-  tags   = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
+  tags   = merge({ "Name" = "${var.desc_tags.project}-rt_public" }, var.desc_tags)
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw1.id
@@ -37,10 +49,14 @@ resource "aws_route_table" "rt_public" {
 #Route Table privada
 resource "aws_route_table" "rt_private" {
   vpc_id = aws_vpc.this.id
-  tags   = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
+  tags   = merge({ "Name" = "${var.desc_tags.project}-rt_private" }, var.desc_tags)
   route {
     cidr_block = aws_vpc.this.cidr_block
     gateway_id = "local"
+  }
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.ngw1.id
   }
 }
 
@@ -88,6 +104,12 @@ resource "aws_route_table_association" "rt_association_privateAZ2" { #https://re
   ]
 }
 
+#Route Table Association
+resource "aws_route_table_association" "rt_association_ngw1" {
+  subnet_id      = aws_subnet.subnet2-AZ1-private.id
+  route_table_id = aws_route_table.rt_private.id
+}
+
 # Subnets
 resource "aws_subnet" "subnet1-AZ1-public" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet
   vpc_id                                      = aws_vpc.this.id
@@ -95,7 +117,7 @@ resource "aws_subnet" "subnet1-AZ1-public" { #https://registry.terraform.io/prov
   availability_zone                           = var.availability_zones[0]
   map_public_ip_on_launch                     = true
   enable_resource_name_dns_a_record_on_launch = true
-  tags                                        = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
+  tags                                        = merge({ "Name" = "${var.desc_tags.project}-subnet1-AZ1-public" }, var.desc_tags)
 }
 
 # Subnets
@@ -104,7 +126,7 @@ resource "aws_subnet" "subnet2-AZ1-private" { #https://registry.terraform.io/pro
   cidr_block              = var.cidr_blocks_subnets[2]
   availability_zone       = var.availability_zones[0]
   map_public_ip_on_launch = false
-  tags                    = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
+  tags                    = merge({ "Name" = "${var.desc_tags.project}-subnet2-AZ1-private" }, var.desc_tags)
 }
 
 # Subnets
@@ -113,7 +135,7 @@ resource "aws_subnet" "subnet1-AZ2-public" { #https://registry.terraform.io/prov
   cidr_block              = var.cidr_blocks_subnets[1]
   availability_zone       = var.availability_zones[1]
   map_public_ip_on_launch = true
-  tags                    = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
+  tags                    = merge({ "Name" = "${var.desc_tags.project}-subnet1-AZ2-public" }, var.desc_tags)
 }
 
 # Subnets
@@ -122,7 +144,7 @@ resource "aws_subnet" "subnet2-AZ2-private" { #https://registry.terraform.io/pro
   cidr_block              = var.cidr_blocks_subnets[3]
   availability_zone       = var.availability_zones[1]
   map_public_ip_on_launch = false
-  tags                    = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
+  tags                    = merge({ "Name" = "${var.desc_tags.project}-subnet2-AZ2-private" }, var.desc_tags)
 }
 
 # Network ACL
@@ -190,10 +212,10 @@ resource "aws_security_group" "sg_service" { #https://registry.terraform.io/prov
   vpc_id      = aws_vpc.this.id
   tags        = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
   ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    cidr_blocks = [ aws_vpc.this.cidr_block ]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.this.cidr_block]
   }
   egress {
     from_port   = 0
@@ -235,11 +257,12 @@ resource "aws_autoscaling_group" "this" { #https://registry.terraform.io/provide
   desired_capacity          = var.desired_capacity
   health_check_grace_period = var.asg_health_check_grace_period
   health_check_type         = var.asg_health_check_type
-  default_cooldown = 60
-  vpc_zone_identifier       = [aws_subnet.subnet1-AZ1-public.id, aws_subnet.subnet1-AZ2-public.id]
-  target_group_arns         = []
-  metrics_granularity       = "1Minute"
-  depends_on                = [aws_alb.this]
+  default_cooldown          = 60
+  #vpc_zone_identifier       = [aws_subnet.subnet1-AZ1-public.id, aws_subnet.subnet1-AZ2-public.id]
+  vpc_zone_identifier = [aws_subnet.subnet2-AZ1-private.id] # para desafio 1
+  target_group_arns   = []
+  metrics_granularity = "1Minute"
+  depends_on          = [aws_alb.this]
   enabled_metrics = [
     "GroupMinSize",
     "GroupMaxSize",

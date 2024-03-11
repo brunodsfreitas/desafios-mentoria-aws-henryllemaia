@@ -1,7 +1,7 @@
 #GLOBAL 
 region  = "us-east-2"
 profile = "default"
-domain = "seu-id" #change
+domain  = "seu-id" #change
 ###########################################################################
 # Global Project Organization
 ###########################################################################
@@ -30,7 +30,7 @@ availability_zones  = ["us-east-2a", "us-east-2b"]
 #EC2
 image_id             = "ami-0f6000d4563f2c95f" #Amazon Linux With ECS
 instance_type        = "t2.micro"
-key_name             = "sua-key" #change
+key_name             = "sua-key"         #change
 iam_instance_profile = "sua-role-acesso" #change
 
 #Autoscaling Group

@@ -56,21 +56,21 @@ module "TaskDefinition_Application" {
   app_config_db_port           = var.app_config_db_port
   app_config_db_pwd            = var.app_config_db_pwd
   app_config_db_user           = var.app_config_db_user
-  domain = var.domain
+  domain                       = var.domain
 
   # Global Project Organization
   desc_tags = var.desc_tags
 
   #Module ecsCluster
-  ecr_repo_url           = module.ecrRepo.repository_url
-  autoscaling_group_arn  = module.ecsCluster.module_info.autoscaling_group_arn
-  autoscaling_group_name = module.ecsCluster.module_info.autoscaling_group_name
-  vpc_id_for_tg          = module.ecsCluster.module_info.vpc_id
-  alb_arn_to_listener    = module.ecsCluster.module_info.alb_arn
-  cluster_id_for_service = module.ecsCluster.module_info.cluster_id
+  ecr_repo_url               = module.ecrRepo.repository_url
+  autoscaling_group_arn      = module.ecsCluster.module_info.autoscaling_group_arn
+  autoscaling_group_name     = module.ecsCluster.module_info.autoscaling_group_name
+  vpc_id_for_tg              = module.ecsCluster.module_info.vpc_id
+  alb_arn_to_listener        = module.ecsCluster.module_info.alb_arn
+  cluster_id_for_service     = module.ecsCluster.module_info.cluster_id
   alb_dns_name_to_dns_record = module.ecsCluster.module_info.alb_dns_name
 
-  depends_on = [ module.ecsCluster ]
+  depends_on = [module.ecsCluster]
 }
 
 ############################################################################################
@@ -102,5 +102,5 @@ module "TaskDefinition_Database" {
   alb_arn_to_listener    = module.ecsCluster.module_info.alb_arn
   cluster_id_for_service = module.ecsCluster.module_info.cluster_id
 
-  depends_on = [ module.ecsCluster ]
+  depends_on = [module.ecsCluster]
 }

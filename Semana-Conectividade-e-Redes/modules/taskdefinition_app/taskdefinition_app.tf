@@ -108,6 +108,6 @@ resource "aws_route53_record" "alb_dns_record" {
   zone_id = var.domain
   name    = "desafio1-semana-conectividade"
   type    = "CNAME"
-  ttl = 300
+  ttl     = 300
   records = [var.alb_dns_name_to_dns_record]
 }

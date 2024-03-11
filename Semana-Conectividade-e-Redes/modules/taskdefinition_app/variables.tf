@@ -95,6 +95,28 @@ variable "cluster_id_for_service" {
   default     = null
 }
 
+#DNS Record
+variable "domain" {
+  type        = string
+  description = "Zone ID do registro de DNS Route53"
+  default     = null
+}
+variable "alb_name_to_dns_record" {
+  type        = string
+  description = "Nome do Load Balancer do Projeto"
+  default     = null
+}
+variable "alb_zone_id_to_dns_record" {
+  type        = string
+  description = "ZoneID do Load Balancer do Projeto"
+  default     = null
+}
+variable "alb_dns_name_to_dns_record" {
+  type        = string
+  description = "DNS Name do Load Balancer do Projeto"
+  default     = null
+}
+
 #Organization
 variable "desc_tags" {
   type        = map(string)

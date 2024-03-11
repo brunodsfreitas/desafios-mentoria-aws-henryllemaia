@@ -12,7 +12,6 @@ resource "aws_ecs_task_definition" "this" { #https://registry.terraform.io/provi
     {
         "name": "${var.td_task_name}",
         "image": "${var.ecr_repo_url}",
-        "hostname": "${var.service_name}",
         "essential": true,
         "portMappings": [
             {
@@ -56,7 +55,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" { #ht
 }
 
 # ECS Service
-resource "aws_ecs_service" "this" {
+resource "aws_ecs_service" "db" {
   name                = var.service_name
   cluster             = var.cluster_id_for_service
   task_definition     = aws_ecs_task_definition.this.arn

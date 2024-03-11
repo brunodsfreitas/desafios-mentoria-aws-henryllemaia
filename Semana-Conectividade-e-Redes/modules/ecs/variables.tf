@@ -88,7 +88,7 @@ variable "asg_health_check_type" {
 variable "asg_health_check_grace_period" {
   type        = number
   description = "Tempo em Segundos para validação de health check"
-  default     = 300
+  default     = 60
 }
 
 

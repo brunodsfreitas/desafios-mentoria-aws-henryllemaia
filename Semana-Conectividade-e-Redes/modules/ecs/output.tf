@@ -6,6 +6,6 @@ output "module_info" {
     vpc_id                 = aws_vpc.this.id
     alb_arn                = aws_alb.this.arn
     cluster_id             = aws_ecs_cluster.this.id
-
+    alb_dns_name           = aws_alb.this.dns_name
   }
 }

@@ -52,10 +52,11 @@ module "TaskDefinition_Application" {
   ecs_task_execution_role_name = var.ecs_task_execution_role_name
   td_cpu                       = var.td_cpu
   td_memory                    = var.td_memory
-  app_config_db_host           = module.TaskDefinition_Database.container_name
+  app_config_db_host           = var.app_config_db_host
   app_config_db_port           = var.app_config_db_port
   app_config_db_pwd            = var.app_config_db_pwd
   app_config_db_user           = var.app_config_db_user
+  domain = var.domain
 
   # Global Project Organization
   desc_tags = var.desc_tags
@@ -67,6 +68,9 @@ module "TaskDefinition_Application" {
   vpc_id_for_tg          = module.ecsCluster.module_info.vpc_id
   alb_arn_to_listener    = module.ecsCluster.module_info.alb_arn
   cluster_id_for_service = module.ecsCluster.module_info.cluster_id
+  alb_dns_name_to_dns_record = module.ecsCluster.module_info.alb_dns_name
+
+  depends_on = [ module.ecsCluster ]
 }
 
 ############################################################################################
@@ -98,4 +102,5 @@ module "TaskDefinition_Database" {
   alb_arn_to_listener    = module.ecsCluster.module_info.alb_arn
   cluster_id_for_service = module.ecsCluster.module_info.cluster_id
 
+  depends_on = [ module.ecsCluster ]
 }

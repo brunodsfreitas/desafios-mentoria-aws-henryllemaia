@@ -19,6 +19,12 @@ variable "desc_tags" {
   default     = null
 }
 
+variable "domain" {
+  type        = string
+  description = "Zone ID do registro de DNS Route53"
+  default     = null
+}
+
 ###########################################################################
 # Module ecsCluster
 ###########################################################################

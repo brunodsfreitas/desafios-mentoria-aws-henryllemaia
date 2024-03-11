@@ -12,7 +12,6 @@ resource "aws_ecs_task_definition" "this" { #https://registry.terraform.io/provi
     {
         "name": "${var.td_task_name}",
         "image": "${var.ecr_repo_url}",
-        "hostname": "${var.service_name}",
         "essential": true,
         "portMappings": [
             {
@@ -82,7 +81,7 @@ resource "aws_lb_listener" "listener80" { #https://registry.terraform.io/provide
 }
 
 # ECS Service
-resource "aws_ecs_service" "this" {
+resource "aws_ecs_service" "app" {
   name                = var.service_name
   cluster             = var.cluster_id_for_service
   task_definition     = aws_ecs_task_definition.this.arn
@@ -102,4 +101,13 @@ resource "aws_ecs_service" "this" {
 resource "aws_autoscaling_attachment" "service_1" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_attachment
   autoscaling_group_name = var.autoscaling_group_name
   lb_target_group_arn    = aws_lb_target_group.this.arn
+}
+
+#DNS Record
+resource "aws_route53_record" "alb_dns_record" {
+  zone_id = var.domain
+  name    = "desafio1-semana-conectividade"
+  type    = "CNAME"
+  ttl = 300
+  records = [var.alb_dns_name_to_dns_record]
 }

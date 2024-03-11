@@ -10,6 +10,7 @@ resource "aws_vpc" "this" {
 resource "aws_internet_gateway" "igw1" {
   vpc_id = aws_vpc.this.id
   tags   = merge({ "Name" = "${var.desc_tags.project}" }, var.desc_tags)
+  depends_on = [ aws_vpc.this ]
 }
 
 #Route Table default
@@ -192,12 +193,7 @@ resource "aws_security_group" "sg_service" { #https://registry.terraform.io/prov
     from_port = 0
     to_port   = 0
     protocol  = "-1"
-    cidr_blocks = [
-      aws_subnet.subnet1-AZ1-public.cidr_block,
-      aws_subnet.subnet1-AZ2-public.cidr_block,
-      aws_subnet.subnet2-AZ1-private.cidr_block,
-      aws_subnet.subnet2-AZ2-private.cidr_block
-    ]
+    cidr_blocks = [ aws_vpc.this.cidr_block ]
   }
   egress {
     from_port   = 0
@@ -239,6 +235,7 @@ resource "aws_autoscaling_group" "this" { #https://registry.terraform.io/provide
   desired_capacity          = var.desired_capacity
   health_check_grace_period = var.asg_health_check_grace_period
   health_check_type         = var.asg_health_check_type
+  default_cooldown = 60
   vpc_zone_identifier       = [aws_subnet.subnet1-AZ1-public.id, aws_subnet.subnet1-AZ2-public.id]
   target_group_arns         = []
   metrics_granularity       = "1Minute"

@@ -53,3 +53,6 @@ variable "mycidr" {
 
 corrigir erro de rede
 comunicação entre containers
+
+
+DNS failover

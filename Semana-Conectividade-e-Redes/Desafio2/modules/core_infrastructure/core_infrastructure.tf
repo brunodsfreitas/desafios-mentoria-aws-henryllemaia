@@ -293,12 +293,12 @@ resource "aws_autoscaling_group" "this" { #https://registry.terraform.io/provide
 
   name                      = "${var.desc_tags.project}-asg"
   max_size                  = 4
-  min_size                  = 2
-  desired_capacity          = 2
+  min_size                  = 1
+  desired_capacity          = 1
   health_check_grace_period = 60
   health_check_type         = "ELB"
   default_cooldown          = 60
-  vpc_zone_identifier       = [aws_subnet.subnet2b-private.id,aws_subnet.subnet2a-private.id]
+  vpc_zone_identifier       = [aws_subnet.subnet2b-private.id, aws_subnet.subnet2a-private.id]
   target_group_arns         = []
   depends_on                = [aws_alb.this]
   launch_template {

@@ -40,29 +40,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" { #ht
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# Target Group
-resource "aws_lb_target_group" "this" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group
-  name                 = var.target_group_name
-  port                 = var.application_container_port
-  protocol             = "HTTP"
-  target_type          = "instance"
-  vpc_id               = var.vpc_id_for_tg
-  deregistration_delay = 60
-  tags                 = var.desc_tags
-}
-
-# Listener HTTP 80
-resource "aws_lb_listener" "listener80" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener
-  load_balancer_arn = var.alb_arn_to_listener
-  port              = "80"
-  protocol          = "HTTP"
-  tags              = var.desc_tags
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.this.arn
-  }
-}
-
 # ECS Service
 resource "aws_ecs_service" "app" {
   name                = var.service_name
@@ -74,7 +51,7 @@ resource "aws_ecs_service" "app" {
   tags                = var.desc_tags
   depends_on          = [aws_iam_role_policy_attachment.ecs_task_execution_role_policy]
   load_balancer {
-    target_group_arn = aws_lb_target_group.this.arn
+    target_group_arn = aws_lb_target_group.play.arn
     container_name   = aws_ecs_task_definition.this.family
     container_port   = var.application_container_port
   }
@@ -82,7 +59,7 @@ resource "aws_ecs_service" "app" {
     type = "distinctInstance"
   }
   ordered_placement_strategy {
-    type = "spread"
+    type  = "spread"
     field = "instanceId"
   }
 }
@@ -90,14 +67,42 @@ resource "aws_ecs_service" "app" {
 #Autoscaling Group Attachment
 resource "aws_autoscaling_attachment" "service_1" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_attachment
   autoscaling_group_name = var.autoscaling_group_name
-  lb_target_group_arn    = aws_lb_target_group.this.arn
+  lb_target_group_arn    = var.app_qrcode_target_group_arn
 }
 
 #DNS Record
 resource "aws_route53_record" "alb_dns_record" {
   zone_id = var.domain
-  name    = "qr"
+  name    = "play"
   type    = "CNAME"
   ttl     = 300
   records = [var.alb_dns_name_to_dns_record]
+}
+
+# Target Group
+resource "aws_lb_target_group" "play" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group
+  name                 = var.target_group_name
+  port                 = var.application_container_port
+  protocol             = "HTTP"
+  target_type          = "instance"
+  vpc_id               = var.vpc_id_for_tg
+  deregistration_delay = 60
+  tags                 = var.desc_tags
+}
+
+# Rule Listener
+resource "aws_lb_listener_rule" "rule_play" {
+  listener_arn = var.app_qrcode_listener_arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.play.arn
+  }
+
+  condition {
+    host_header {
+      values = ["play.brunofreitas.tec.br"]
+    }
+  }
 }

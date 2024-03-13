@@ -43,6 +43,18 @@ variable "alb_arn_to_listener" {
   default     = null
 }
 
+variable "app_qrcode_target_group_arn" {
+  type        = string
+  description = "target group"
+  default     = null
+}
+
+variable "app_qrcode_listener_arn" {
+  type        = string
+  description = "listener"
+  default     = null
+}
+
 #ECS Service
 variable "service_name" {
   type        = string

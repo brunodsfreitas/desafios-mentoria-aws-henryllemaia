@@ -51,18 +51,6 @@ resource "aws_lb_target_group" "this" { #https://registry.terraform.io/providers
   tags                 = var.desc_tags
 }
 
-# Listener HTTP 80
-resource "aws_lb_listener" "listener80" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener
-  load_balancer_arn = var.alb_arn_to_listener
-  port              = "80"
-  protocol          = "HTTP"
-  tags              = var.desc_tags
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.this.arn
-  }
-}
-
 # ECS Service
 resource "aws_ecs_service" "app" {
   name                = var.service_name
@@ -82,7 +70,7 @@ resource "aws_ecs_service" "app" {
     type = "distinctInstance"
   }
   ordered_placement_strategy {
-    type = "spread"
+    type  = "spread"
     field = "instanceId"
   }
 }
@@ -100,4 +88,16 @@ resource "aws_route53_record" "alb_dns_record" {
   type    = "CNAME"
   ttl     = 300
   records = [var.alb_dns_name_to_dns_record]
+}
+
+# Listener HTTP 80
+resource "aws_lb_listener" "listener80" {
+  load_balancer_arn = var.alb_arn_to_listener
+  port              = "80"
+  protocol          = "HTTP"
+  tags              = var.desc_tags
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.this.arn
+  }
 }

@@ -26,7 +26,7 @@ variable "domain" {
 }
 
 ###########################################################################
-# Module ecsCluster
+# Module core_infrastructure
 ###########################################################################
 
 # Services
@@ -84,7 +84,7 @@ variable "iam_instance_profile" {
 
 
 ###########################################################################
-# Module TaskDefinition_Application
+# Module application_qrcode
 ###########################################################################
 
 variable "td_task_name" {
@@ -130,63 +130,55 @@ variable "td_cpu" {
 
 
 ###########################################################################
-# Module TaskDefinition_Database
+# Module application_tosios
 ###########################################################################
 
-variable "db_td_task_name" {
+variable "tosios_td_task_name" {
   type        = string
   description = "Nome da Task Definition"
   default     = "TD"
 }
-variable "db_td_task_family" {
+variable "tosios_td_task_family" {
   type        = string
   description = "Nome (family) da Task Definition"
   default     = null
 }
-variable "db_application_container_port" {
+variable "tosios_application_container_port" {
   type        = number
   description = "Porta da Aplicação da Task Definition"
   default     = null
 }
-variable "db_service_name" {
+variable "tosios_service_name" {
   type        = string
   description = "Nome do Serviço para rodar no Cluster"
   default     = "servico"
 }
-variable "db_target_group_name" {
+variable "tosios_target_group_name" {
   type        = string
   description = "Nome do Target Group"
   default     = "TG"
 }
-variable "db_ecs_task_execution_role_name" {
+variable "tosios_ecs_task_execution_role_name" {
   type        = string
   description = "IAM Role para execução da Task Definition"
   default     = null
 }
-variable "db_td_memory" {
+variable "tosios_td_memory" {
   type        = number
   description = "Quantidade em MB de mémoria a ser alocada pela Task Definition"
   default     = 256
 }
-variable "db_td_cpu" {
+variable "tosios_td_cpu" {
   type        = number
   description = "Quantidade de CPU a ser alocada pela Task Definition"
   default     = 256
 }
-variable "db_name" {
+variable "app_qrcode_target_group_arn" {
   type        = string
-  description = "Nome do banco de dados"
-  default     = "postgres"
+  description = "target group"
+  default     = null
 }
 
-variable "db_username" {
-  type        = string
-  description = "Nome do usuário do banco de dados"
-  default     = "postgres"
-}
 
-variable "db_password" {
-  type        = string
-  description = "Senha do usuário do banco de dados"
-  default     = "postgres"
-}
+
+

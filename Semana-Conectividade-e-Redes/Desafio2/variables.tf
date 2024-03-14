@@ -178,6 +178,13 @@ variable "app_qrcode_target_group_arn" {
   description = "target group"
   default     = null
 }
+variable "target_group_desafio2_bia_arn" {
+  type        = string
+  description = "target_group_desafio2_bia_arn"
+  default     = null
+}
+
+
 
 
 

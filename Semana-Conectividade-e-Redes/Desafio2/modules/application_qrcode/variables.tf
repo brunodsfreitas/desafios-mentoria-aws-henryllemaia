@@ -87,6 +87,14 @@ variable "alb_dns_name_to_dns_record" {
   default     = null
 }
 
+variable "target_group_desafio2_bia_arn" {
+  type        = string
+  description = "target_group_desafio2_bia"
+  default     = null
+}
+
+
+
 #Organization
 variable "desc_tags" {
   type        = map(string)

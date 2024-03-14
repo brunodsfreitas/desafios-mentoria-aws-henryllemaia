@@ -88,6 +88,20 @@ resource "aws_route_table" "rt_subnet2b-private" {
   }
 }
 
+#Route Table privada extra desafio 2
+resource "aws_route_table" "rt_subnet2c-private" {
+  vpc_id = aws_vpc.this.id
+  tags   = merge({ "Name" = "${var.desc_tags.project}-rt_subnet2c-private" }, var.desc_tags)
+  route {
+    cidr_block = aws_vpc.this.cidr_block
+    gateway_id = "local"
+  }
+  route { ### PROVISORIO PARA INSTALAR A ESTRUTURA NECESSARIA, SERA REMOVIDO MANUALMENTE
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw1.id
+  }
+}
+
 #Route Table Association
 resource "aws_route_table_association" "rt_association_subnet1a-public" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association
   subnet_id      = aws_subnet.subnet1a-public.id
@@ -132,6 +146,17 @@ resource "aws_route_table_association" "rt_association_subnet2b-private" { #http
   ]
 }
 
+#Route Table Association extra desafio 2
+resource "aws_route_table_association" "rt_association_subnet2c-private" {
+  subnet_id      = aws_subnet.subnet2c-private.id
+  route_table_id = aws_route_table.rt_subnet2c-private.id
+
+  depends_on = [
+    aws_subnet.subnet2c-private,
+    aws_route_table.rt_subnet2c-private,
+  ]
+}
+
 #Route Table Association 
 resource "aws_route_table_association" "rt_association_ngw1" {
   subnet_id      = aws_subnet.subnet2a-private.id
@@ -142,6 +167,16 @@ resource "aws_route_table_association" "rt_association_ngw1" {
 resource "aws_route_table_association" "rt_association_ngw2" {
   subnet_id      = aws_subnet.subnet2b-private.id
   route_table_id = aws_route_table.rt_subnet2b-private.id
+}
+
+# Subnets extra desafio 2
+resource "aws_subnet" "subnet2c-private" {
+  vpc_id                                      = aws_vpc.this.id
+  cidr_block                                  = var.cidr_blocks_subnets[4]
+  availability_zone                           = var.availability_zones[2]
+  map_public_ip_on_launch                     = false
+  enable_resource_name_dns_a_record_on_launch = true
+  tags                                        = merge({ "Name" = "${var.desc_tags.project}-subnet2c-private" }, var.desc_tags)
 }
 
 # Subnets
@@ -222,7 +257,7 @@ resource "aws_security_group" "sg_load_balancer" {
   }
   ingress {
     from_port   = 3000
-    to_port     = 3000
+    to_port     = 3001
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -243,7 +278,8 @@ resource "aws_alb" "this" {
   tags               = var.desc_tags
   subnets = [
     aws_subnet.subnet1a-public.id,
-    aws_subnet.subnet1b-public.id
+    aws_subnet.subnet1b-public.id,
+    aws_subnet.subnet2c-private.id
   ]
 }
 
@@ -353,4 +389,131 @@ unzip /tmp/terraform.zip -d /usr/local/bin/
 rm /tmp/terraform.zip
 sudo git clone https://github.com/brunodsfreitas/desafios-mentoria-aws-henryllemaia.git
 EOF
+}
+
+#EC2IC
+resource "aws_ec2_instance_connect_endpoint" "this" {
+  #  vpc_id = aws_vpc.this
+  subnet_id          = aws_subnet.subnet2a-private.id
+  security_group_ids = [aws_security_group.sg_ec2_instance_connect.id]
+}
+
+# Security Group EC2IC
+resource "aws_security_group" "sg_ec2_instance_connect" {
+  name        = "${var.desc_tags.project}-sg_ec2_instance_connect"
+  description = "Allow SSH inbound and all outbound traffic"
+  vpc_id      = aws_vpc.this.id
+  tags        = var.desc_tags
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+#Route EC2IC
+#resource "aws_route" "route_to_endpoint" {
+#  route_table_id         = aws_route_table.rt_subnet2a-private.id
+#  destination_cidr_block = aws_vpc.this.cidr_block
+#  vpc_endpoint_id        = aws_ec2_instance_connect_endpoint.this.id
+#  #instance_connect_endpoint_id = aws_ec2_instance_connect_endpoint.this.id
+#}
+
+#IAM Profile
+resource "aws_iam_instance_profile" "ec2-instance-connect" {
+  name = "ec2-instance-connect-profile"
+  role = aws_iam_role.role_ec2_instance_connect.name
+}
+
+#IAM Role
+resource "aws_iam_role" "role_ec2_instance_connect" {
+  tags = var.desc_tags
+  name = "role_ec2_instance_connect"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      },
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+#IAM Attachment
+resource "aws_iam_role_policy_attachment" "ec2_policy_attachment" {
+  role       = aws_iam_role.role_ec2_instance_connect.name
+  policy_arn = aws_iam_policy.ec2_instance_connect_policy.arn
+}
+#Policy
+resource "aws_iam_policy" "ec2_instance_connect_policy" {
+  name        = "ec2_instance_connect_policy"
+  description = "Ec2 Instance Connect"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = [
+        "ec2:DescribeInstances",
+        "ec2:DescribeTags",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:RebootInstances",
+        "ec2:TerminateInstances"
+      ],
+      Resource = "*"
+    }]
+  })
+}
+
+# Security Group default
+resource "aws_security_group" "sg_ec2_application_bia" {
+  name   = "${var.desc_tags.project}-sg_ec2_application_bia"
+  vpc_id = aws_vpc.this.id
+  tags   = var.desc_tags
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.this.cidr_block]
+  }
+  ingress {
+    from_port   = 3001
+    to_port     = 3001
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.this.cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# EC2 Instance
+resource "aws_instance" "applicacao_bia" {
+  ami                    = "ami-06265faae004c8390" #AMI personalizada
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.subnet2c-private.id
+  vpc_security_group_ids = [aws_security_group.sg_ec2_application_bia.id]
+  key_name               = var.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2-instance-connect.name
+  tags                   = merge({ "Name" = "${var.desc_tags.project}-applicacao_bia" }, var.desc_tags)
 }

@@ -79,6 +79,15 @@ resource "aws_route53_record" "alb_dns_record" {
   records = [var.alb_dns_name_to_dns_record]
 }
 
+#DNS Record
+resource "aws_route53_record" "alb_dns_record_bastion" {
+  zone_id = var.domain
+  name    = "bastion-host"
+  type    = "A"
+  ttl     = 300
+  records = [var.bastion_host_instance_public_ip]
+}
+
 # Target Group
 resource "aws_lb_target_group" "play" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group
   name                 = var.target_group_name
@@ -105,4 +114,37 @@ resource "aws_lb_listener_rule" "rule_play" {
       values = ["play.brunofreitas.tec.br"]
     }
   }
+}
+
+# Target Group extra desafio 2
+resource "aws_lb_target_group" "desafio2" { #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group
+  name                 = "TG-desafio2"
+  port                 = 3001
+  protocol             = "HTTP"
+  target_type          = "instance"
+  vpc_id               = var.vpc_id_for_tg
+  deregistration_delay = 60
+  tags                 = var.desc_tags
+}
+
+# Rule Listener extra desafio 2
+#resource "aws_lb_listener_rule" "desafio2" {
+#  listener_arn = var.app_qrcode_listener_arn
+#  priority     = 105
+#
+#  action {
+#    type             = "forward"
+#    target_group_arn = aws_lb_target_group.desafio2.arn
+#  }
+#
+#  condition {
+#    host_header {
+#      values = ["desafio2.brunofreitas.tec.br"]
+#    }
+#  }
+#}
+
+resource "aws_lb_target_group_attachment" "example" {
+  target_group_arn = aws_lb_target_group.desafio2.arn
+  target_id        = var.app_bia_instance_id
 }

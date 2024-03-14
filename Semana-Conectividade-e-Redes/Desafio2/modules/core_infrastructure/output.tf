@@ -7,5 +7,7 @@ output "module_info" {
     alb_arn                = aws_alb.this.arn
     cluster_id             = aws_ecs_cluster.this.id
     alb_dns_name           = aws_alb.this.dns_name
+    app_bia_instance_id       = aws_instance.applicacao_bia.id
+    bastion_host_instance_public_ip       = aws_instance.bastion_host.public_ip
   }
 }

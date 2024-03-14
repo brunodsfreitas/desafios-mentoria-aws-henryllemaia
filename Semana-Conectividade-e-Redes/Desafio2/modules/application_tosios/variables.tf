@@ -99,6 +99,25 @@ variable "alb_dns_name_to_dns_record" {
   default     = null
 }
 
+variable "app_bia_instance_id" {
+  type        = string
+  description = "app_bia_instance_id"
+  default     = null
+}
+
+variable "target_group_desafio2_bia_arn" {
+  type        = string
+  description = "target_group_desafio2_bia_arn"
+  default     = null
+}
+variable "bastion_host_instance_public_ip" {
+  type        = string
+  description = "bastion_host_instance_public_ip"
+  default     = null
+}
+
+
+
 #Organization
 variable "desc_tags" {
   type        = map(string)

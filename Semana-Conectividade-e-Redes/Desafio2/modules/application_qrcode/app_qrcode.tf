@@ -90,6 +90,15 @@ resource "aws_route53_record" "alb_dns_record" {
   records = [var.alb_dns_name_to_dns_record]
 }
 
+#DNS Record extra desafio 2
+resource "aws_route53_record" "alb_dns_record2" {
+  zone_id = var.domain
+  name    = "desafio2"
+  type    = "CNAME"
+  ttl     = 300
+  records = [var.alb_dns_name_to_dns_record]
+}
+
 # Listener HTTP 80
 resource "aws_lb_listener" "listener80" {
   load_balancer_arn = var.alb_arn_to_listener
@@ -99,5 +108,17 @@ resource "aws_lb_listener" "listener80" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.this.arn
+  }
+}
+
+# Listener HTTP 3001
+resource "aws_lb_listener" "listener3001" {
+  load_balancer_arn = var.alb_arn_to_listener
+  port              = "3001"
+  protocol          = "HTTP"
+  tags              = var.desc_tags
+  default_action {
+    type             = "forward"
+    target_group_arn = var.target_group_desafio2_bia_arn
   }
 }

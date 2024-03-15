@@ -1,0 +1,30 @@
+version: '3.8'
+
+networks:
+  minha_rede:
+    driver: bridge
+
+
+services:
+  linux_container:
+    build:
+      context: .
+      dockerfile: ansible.dockerfile
+    command: tail -f /dev/null
+    networks:
+      - minha_rede
+    deploy:
+      replicas: 4
+
+  ansible_container:
+    build:
+      context: .
+      dockerfile: ansible.dockerfile
+    volumes:
+      - ./playbook.yml:/ansible/playbook.yml
+      - ./inventory.ini:/ansible/inventory.ini
+    command: tail -f /dev/null
+    networks:
+      - minha_rede
+    depends_on:
+      - linux_container

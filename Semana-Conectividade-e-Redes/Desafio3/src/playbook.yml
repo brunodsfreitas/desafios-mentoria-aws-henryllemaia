@@ -1,0 +1,19 @@
+---
+- name: Executar script em múltiplos servidores
+  hosts: seus_servidores
+  become: true
+  gather_facts: no
+
+  tasks:
+    - name: Transferir script para os servidores
+      copy:
+        src: /caminho/para/seu/script.sh
+        dest: /caminho/destino/script.sh
+        mode: "0755"  # Garante que o script tenha permissões de execução
+      tags:
+        - transferir_script
+
+    - name: Executar script nos servidores
+      command: /caminho/destino/script.sh
+      tags:
+        - executar_script

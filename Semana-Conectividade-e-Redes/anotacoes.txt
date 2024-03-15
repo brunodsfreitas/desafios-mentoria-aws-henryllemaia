@@ -109,3 +109,22 @@ aws ssm start-session --target i-005332ecba8aaeca1 --region us-east-2 --document
             Facilita o acesso a instâncias mesmo em redes privadas ou isoladas
             Remove a necessidade de configuração de chaves SSH ou senhas
             Rastreabilidade e controle de acesso através do AWS IAM
+
+
+            terraform {
+              backend "bbb" {
+                bucket = "meubucket"
+                prefix = "terraform/state"
+              }
+            }
+
+    feat
+    fix
+    docs
+    style
+    refactor
+    test
+    chore
+    perf
+    ci
+    revert

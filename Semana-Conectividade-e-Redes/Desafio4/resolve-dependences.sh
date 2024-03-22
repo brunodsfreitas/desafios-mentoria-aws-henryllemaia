@@ -17,3 +17,5 @@ rm -fR modules/route53
 git clone --single-branch https://github.com/terraform-aws-modules/terraform-aws-route53.git modules/route53/
 rm -fR modules/ec2
 git clone --single-branch https://github.com/terraform-aws-modules/terraform-aws-ec2-instance.git modules/ec2/
+rm -fR modules/ecs
+git clone --single-branch https://github.com/terraform-aws-modules/terraform-aws-ecs.git modules/ecs

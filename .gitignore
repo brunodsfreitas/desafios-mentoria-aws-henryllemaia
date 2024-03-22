@@ -3,4 +3,6 @@
 terraform.tfstate
 terraform.tfstate.backup
 dev.tfvars
+backup-site.tfvars
+site-prod.tfvars
 Semana-Conectividade-e-Redes/Desafio4/modules/*

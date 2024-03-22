@@ -61,6 +61,30 @@ variable "subnet_availability_zones" {
   default     = null
 }
 
+variable "public_inbound_acl_rules" {
+  type        = list(map(string))
+  description = "public_inbound_acl_rules"
+  default     = null
+}
+
+variable "public_outbound_acl_rules" {
+  type        = list(map(string))
+  description = "public_inbound_acl_rules"
+  default     = null
+}
+
+variable "private_inbound_acl_rules" {
+  type        = list(map(string))
+  description = "private_inbound_acl_rules"
+  default     = null
+}
+
+variable "private_outbound_acl_rules" {
+  type        = list(map(string))
+  description = "private_outbound_acl_rules"
+  default     = null
+}
+
 
 
 /*

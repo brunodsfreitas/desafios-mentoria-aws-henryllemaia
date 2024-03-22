@@ -26,6 +26,12 @@ module "vpc" { #https://github.com/terraform-aws-modules/terraform-aws-vpc
   public_subnet_enable_resource_name_dns_a_record_on_launch  = true
   private_subnet_enable_resource_name_dns_a_record_on_launch = true
 
+  public_inbound_acl_rules = var.public_inbound_acl_rules
+  public_outbound_acl_rules = var.public_outbound_acl_rules
+  public_acl_tags = var.desc_tags
+  private_inbound_acl_rules = var.private_inbound_acl_rules
+  private_outbound_acl_rules = var.private_outbound_acl_rules
+  private_acl_tags = var.desc_tags
   tags = var.desc_tags
 }
 

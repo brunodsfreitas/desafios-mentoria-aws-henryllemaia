@@ -30,13 +30,13 @@ if ! [ $# -ne 2 ]; then
         if [ ! -f "env/site-prod/site-prod.enc" ]; then
             echo "arquivo nao existe prod"
         else
-            openssl enc -aes-256-cbc -d -in env/site-prod/site-prod.enc -out env/site-prod/site-prod.tfvars -k "$2" 
+            openssl enc -aes-256-cbc -d -in env/site-prod/site-prod.enc -out env/site-prod/site-prod.tfvars -k "$2" -pbkdf2 -iter 10000
         fi
 
         if [ ! -f "env/site-bkp/site-backup.enc" ]; then
             echo "arquivo nao existe bkp"
         else
-            openssl enc -aes-256-cbc -d -in env/site-bkp/site-backup.enc -out env/site-bkp/site-backup.tfvars -k "$2" 
+            openssl enc -aes-256-cbc -d -in env/site-bkp/site-backup.enc -out env/site-bkp/site-backup.tfvars -k "$2" -pbkdf2 -iter 10000
         fi
     else 
         exit 0

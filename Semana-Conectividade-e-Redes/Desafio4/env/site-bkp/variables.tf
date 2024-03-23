@@ -140,3 +140,29 @@ variable "sg1_egress_with_cidr_blocks1" {
   description = "sg1_egress_with_cidr_blocks1"
   default     = null
 }
+###############
+### EFS
+###############
+variable "ebs_name" {
+  type        = string
+  description = "ebs_name"
+  default     = null
+}
+variable "ebs_availability_zone_name" {
+  type        = string
+  description = "ebs_availability_zone_name"
+  default     = null
+}
+variable "ebs_size" {
+  type        = number
+  description = "ebs_size"
+  default     = 5
+}
+###############
+### KMS Key
+###############
+variable "kms_key_description" {
+  type        = string
+  description = "kms_key_description"
+  default     = null
+}

@@ -63,6 +63,10 @@ aws ec2-instance-connect ssh --instance-id i-005332ecba8aaeca1 (apenas no clouds
 
 aws ssm start-session --target i-005332ecba8aaeca1 --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters '{"host":["10.15.80.98"],"portNumber":["5432"],"localPortNumber":["5435"]}' --region us-east-2 --profile brunofreitas-UbuntuHome
 
+aws ssm start-session --target i-005332ecba8aaeca1
+
+aws ssm start-session --target i-01d6492abd56ea793 --region eu-north-1
+
 ssh -o "IdentitiesOnly=yes" -i Downloads/laboratorio-aws-2024-keys.pem ec2-user@localhost -p 2222
 
 ssh -o "IdentitiesOnly=yes" -i .ssh/id_rsa.pub ec2-user@localhost -p 2222
@@ -117,6 +121,49 @@ aws ssm start-session --target i-005332ecba8aaeca1 --region us-east-2 --document
                 prefix = "terraform/state"
               }
             }
+
+module "efs_backup" {
+  source = "../../modules/efs"
+
+  # File system
+  name                   = "${var.desc_tags.project}-efs-${var.efs_name}"
+  creation_token         = "${var.desc_tags.project}-efs-${var.efs_name}"
+  encrypted              = true
+  kms_key_arn            = aws_kms_key.efs.arn
+  availability_zone_name = var.efs_availability_zone_name
+  performance_mode       = "generalPurpose" #"maxIO"
+  throughput_mode        = "bursting"
+
+  # File system policy
+  attach_policy                      = false
+  bypass_policy_lockout_safety_check = false
+
+  # Mount targets / security group
+  mount_targets = {
+    "${var.efs_availability_zone_name}" = {
+      subnet_id = module.vpc_backup.public_subnets[0]
+    }
+  }
+  security_group_description = "${var.desc_tags.project}-sg-efs"
+  security_group_vpc_id      = module.vpc_backup.vpc_id
+  security_group_rules = {
+    vpc = {
+      # relying on the defaults provdied for EFS/NFS (2049/TCP + ingress)
+      description = "NFS ingress from VPC subnets"
+      cidr_blocks = concat(module.vpc_backup.public_subnets_cidr_blocks, ["${var.efs_external_subnets}"])
+    }
+  }
+
+  # Backup policy
+  enable_backup_policy = false
+
+  # Replication configuration
+  create_replication_configuration = false
+
+  tags = var.desc_tags
+}
+
+    
 
     feat
     fix

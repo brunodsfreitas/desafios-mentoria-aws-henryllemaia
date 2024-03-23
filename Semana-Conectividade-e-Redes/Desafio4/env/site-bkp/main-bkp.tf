@@ -7,7 +7,7 @@ terraform {
 module "vpc_backup" { #https://github.com/terraform-aws-modules/terraform-aws-vpc
   source = "../../modules/vpc"
 
-  name = "${var.desc_tags.project}-vpc-backup"
+  name = "${var.desc_tags.project}"
   cidr = var.vpc_cidr_block
 
   azs            = var.subnet_availability_zones

@@ -141,7 +141,7 @@ variable "sg1_egress_with_cidr_blocks1" {
   default     = null
 }
 ###############
-### EFS
+### EBS
 ###############
 variable "ebs_name" {
   type        = string

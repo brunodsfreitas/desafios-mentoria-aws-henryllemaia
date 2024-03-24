@@ -354,30 +354,26 @@ variable "sg6_egress_with_cidr_blocks1" {
   description = "sg6_egress_with_cidr_blocks1"
   default     = null
 }
-
 ###############
-### EBS
+### instance connect endpoint
 ###############
-variable "ebs_name" {
+variable "sg7_name" {
   type        = string
-  description = "ebs_name"
+  description = "sg7_name"
   default     = null
 }
-variable "ebs_availability_zone_name" {
+variable "sg7_description" {
   type        = string
-  description = "ebs_availability_zone_name"
+  description = "sg7_description"
   default     = null
 }
-variable "ebs_size" {
-  type        = number
-  description = "ebs_size"
-  default     = 5
+variable "sg7_ingress_with_cidr_blocks1" {
+  type        = list(map(string))
+  description = "sg7_ingress_with_cidr_blocks1"
+  default     = null
 }
-###############
-### KMS Key
-###############
-variable "kms_key_description" {
-  type        = string
-  description = "kms_key_description"
+variable "sg7_egress_with_cidr_blocks1" {
+  type        = list(map(string))
+  description = "sg7_egress_with_cidr_blocks1"
   default     = null
 }

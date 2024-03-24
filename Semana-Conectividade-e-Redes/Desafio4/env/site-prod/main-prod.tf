@@ -56,7 +56,7 @@ module "ec2_bastion_host" {
   instance_type          = var.instance_type
   key_name               = var.key_name
   monitoring             = false
-  subnet_id              = module.vpc.public_subnets[0]
+  subnet_id              = module.vpc.public_subnets[1] #az2
   iam_instance_profile   = var.iam_instance_profile
   user_data              = base64encode(var.user_data)
 
@@ -144,28 +144,6 @@ module "ec2_prod" {
   tags = var.desc_tags
 }
 
-resource "aws_kms_key" "kms_ebs" {
-  description = var.kms_key_description
-  tags        = var.desc_tags
-}
-
-resource "aws_volume_attachment" "backup_data_disk" {
-  device_name = "/dev/sdf"
-  instance_id = module.ec2_prod.id
-  volume_id   = aws_ebs_volume.ebs_prod_data.id
-}
-
-resource "aws_ebs_volume" "ebs_prod_data" {
-  availability_zone = var.ebs_availability_zone_name
-  size              = var.ebs_size
-  encrypted         = true
-  final_snapshot    = false
-  type              = "gp3"
-  kms_key_id        = aws_kms_key.kms_ebs.arn
-  throughput        = 125
-  tags              = merge({ "Name" = "${var.desc_tags.project}-ebs-${var.ebs_name}" }, var.desc_tags)
-}
-
 ### VPC ENDPOINTS
 resource "aws_vpc_endpoint" "ssm" {
   vpc_id            = module.vpc.vpc_id
@@ -200,9 +178,21 @@ resource "aws_vpc_endpoint" "ec2_messages" {
   private_dns_enabled = true
 }
 
+module "sg_instance_connect_endpoint" {
+  source = "../../modules/sg"
+
+  name        = "${var.desc_tags.project}-sg-${var.sg7_name}"
+  description = var.sg7_description
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks      = [module.vpc.vpc_cidr_block]
+  #ingress_with_cidr_blocks = var.sg7_ingress_with_cidr_blocks1
+  egress_with_cidr_blocks  = var.sg7_egress_with_cidr_blocks1
+}
+
 resource "aws_ec2_instance_connect_endpoint" "eice" {
-  subnet_id          = module.vpc.public_subnets[1] #apenas na az2
-  security_group_ids = [module.sg_endpoints.security_group_id]
+  subnet_id          = module.vpc.intra_subnets[1] #apenas na az2
+  security_group_ids = [module.sg_instance_connect_endpoint.security_group_id]
 }
 
 module "sg_endpoints" {

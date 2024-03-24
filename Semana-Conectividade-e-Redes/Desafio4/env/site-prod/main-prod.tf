@@ -4,10 +4,10 @@ terraform {
   }
 }
 
-module "vpc" { #https://github.com/terraform-aws-modules/terraform-aws-vpc
+module "vpc" {
   source = "../../modules/vpc"
 
-  name = "${var.desc_tags.project}"
+  name = var.desc_tags.project
   cidr = var.vpc_cidr_block
 
   azs             = var.subnet_availability_zones
@@ -31,13 +31,13 @@ module "vpc" { #https://github.com/terraform-aws-modules/terraform-aws-vpc
   one_nat_gateway_per_az                                     = true
   public_dedicated_network_acl                               = true
   private_dedicated_network_acl                              = true
-  map_public_ip_on_launch                                   = true
+  map_public_ip_on_launch                                    = true
   intra_subnet_enable_resource_name_dns_a_record_on_launch   = true
   public_subnet_enable_resource_name_dns_a_record_on_launch  = true
   private_subnet_enable_resource_name_dns_a_record_on_launch = true
 }
 
-module "sg_ec2_bastion_host" { #https://github.com/terraform-aws-modules/terraform-aws-security-group
+module "sg_ec2_bastion_host" {
   source = "../../modules/sg"
 
   name        = "${var.desc_tags.project}-sg-${var.sg1_name}"
@@ -49,7 +49,7 @@ module "sg_ec2_bastion_host" { #https://github.com/terraform-aws-modules/terrafo
   egress_with_cidr_blocks  = var.sg1_egress_with_cidr_blocks1
 }
 
-module "ec2_bastion_host" { #https://github.com/terraform-aws-modules/terraform-aws-ec2-instance
+module "ec2_bastion_host" {
   source                 = "../../modules/ec2"
   vpc_security_group_ids = [module.sg_ec2_bastion_host.security_group_id]
   name                   = "${var.desc_tags.project}-${var.ec2_name}"
@@ -63,7 +63,7 @@ module "ec2_bastion_host" { #https://github.com/terraform-aws-modules/terraform-
   tags = var.desc_tags
 }
 
-module "sg_ec2_tosios" { #https://github.com/terraform-aws-modules/terraform-aws-security-group
+module "sg_ec2_tosios" {
   source = "../../modules/sg"
 
   name        = "${var.desc_tags.project}-sg-${var.sg2_name}"
@@ -75,13 +75,13 @@ module "sg_ec2_tosios" { #https://github.com/terraform-aws-modules/terraform-aws
   egress_with_cidr_blocks  = var.sg2_egress_with_cidr_blocks1
 }
 
-module "ec2_tosios" { #https://github.com/terraform-aws-modules/terraform-aws-ec2-instance
+module "ec2_tosios" {
   source                 = "../../modules/ec2"
   vpc_security_group_ids = [module.sg_ec2_tosios.security_group_id]
   name                   = "${var.desc_tags.project}-${var.ec2_2_name}"
   instance_type          = var.ec2_2_instance_type
   key_name               = var.ec2_2_key_name
-  ami = var.ec2_2_ami
+  ami                    = var.ec2_2_ami
   monitoring             = false
   subnet_id              = module.vpc.intra_subnets[1]
   iam_instance_profile   = var.ec2_2_iam_instance_profile
@@ -90,7 +90,7 @@ module "ec2_tosios" { #https://github.com/terraform-aws-modules/terraform-aws-ec
   tags = var.desc_tags
 }
 
-module "sg_ec2_qr" { #https://github.com/terraform-aws-modules/terraform-aws-security-group
+module "sg_ec2_qr" {
   source = "../../modules/sg"
 
   name        = "${var.desc_tags.project}-sg-${var.sg3_name}"
@@ -102,13 +102,13 @@ module "sg_ec2_qr" { #https://github.com/terraform-aws-modules/terraform-aws-sec
   egress_with_cidr_blocks  = var.sg3_egress_with_cidr_blocks1
 }
 
-module "ec2_qr" { #https://github.com/terraform-aws-modules/terraform-aws-ec2-instance
+module "ec2_qr" {
   source                 = "../../modules/ec2"
   vpc_security_group_ids = [module.sg_ec2_qr.security_group_id]
   name                   = "${var.desc_tags.project}-${var.ec2_3_name}"
   instance_type          = var.ec2_3_instance_type
   key_name               = var.ec2_3_key_name
-  ami = var.ec2_3_ami
+  ami                    = var.ec2_3_ami
   monitoring             = false
   subnet_id              = module.vpc.private_subnets[1]
   iam_instance_profile   = var.ec2_3_iam_instance_profile
@@ -117,7 +117,7 @@ module "ec2_qr" { #https://github.com/terraform-aws-modules/terraform-aws-ec2-in
   tags = var.desc_tags
 }
 
-module "sg_ec2_prod" { #https://github.com/terraform-aws-modules/terraform-aws-security-group
+module "sg_ec2_prod" {
   source = "../../modules/sg"
 
   name        = "${var.desc_tags.project}-sg-${var.sg4_name}"
@@ -129,13 +129,13 @@ module "sg_ec2_prod" { #https://github.com/terraform-aws-modules/terraform-aws-s
   egress_with_cidr_blocks  = var.sg4_egress_with_cidr_blocks1
 }
 
-module "ec2_prod" { #https://github.com/terraform-aws-modules/terraform-aws-ec2-instance
+module "ec2_prod" {
   source                 = "../../modules/ec2"
   vpc_security_group_ids = [module.sg_ec2_prod.security_group_id]
   name                   = "${var.desc_tags.project}-${var.ec2_4_name}"
   instance_type          = var.ec2_4_instance_type
   key_name               = var.ec2_4_key_name
-  ami = var.ec2_4_ami
+  ami                    = var.ec2_4_ami
   monitoring             = false
   subnet_id              = module.vpc.private_subnets[0]
   iam_instance_profile   = var.ec2_4_iam_instance_profile
@@ -167,7 +167,6 @@ resource "aws_ebs_volume" "ebs_prod_data" {
 }
 
 ### VPC ENDPOINTS
-
 resource "aws_vpc_endpoint" "ssm" {
   vpc_id            = module.vpc.vpc_id
   service_name      = "com.amazonaws.${var.region}.ssm"
@@ -178,6 +177,7 @@ resource "aws_vpc_endpoint" "ssm" {
 
   private_dns_enabled = true
 }
+
 resource "aws_vpc_endpoint" "ssm_messages" {
   vpc_id            = module.vpc.vpc_id
   service_name      = "com.amazonaws.${var.region}.ssmmessages"
@@ -188,6 +188,7 @@ resource "aws_vpc_endpoint" "ssm_messages" {
 
   private_dns_enabled = true
 }
+
 resource "aws_vpc_endpoint" "ec2_messages" {
   vpc_id            = module.vpc.vpc_id
   service_name      = "com.amazonaws.${var.region}.ec2messages"
@@ -204,14 +205,173 @@ resource "aws_ec2_instance_connect_endpoint" "eice" {
   security_group_ids = [module.sg_endpoints.security_group_id]
 }
 
-module "sg_endpoints" { #https://github.com/terraform-aws-modules/terraform-aws-security-group
+module "sg_endpoints" {
   source = "../../modules/sg"
 
   name        = "${var.desc_tags.project}-sg-${var.sg5_name}"
   description = var.sg5_description
   vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks     = [module.vpc.vpc_cidr_block]
+  ingress_cidr_blocks      = [module.vpc.vpc_cidr_block]
   ingress_with_cidr_blocks = var.sg5_ingress_with_cidr_blocks1
-  egress_with_cidr_blocks = var.sg5_egress_with_cidr_blocks1
+  egress_with_cidr_blocks  = var.sg5_egress_with_cidr_blocks1
+}
+
+module "sg_alb" {
+  source = "../../modules/sg"
+
+  name        = "${var.desc_tags.project}-sg-${var.sg6_name}"
+  description = var.sg6_description
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks      = [module.vpc.vpc_cidr_block]
+  ingress_with_cidr_blocks = var.sg6_ingress_with_cidr_blocks1
+  egress_with_cidr_blocks  = var.sg6_egress_with_cidr_blocks1
+}
+
+# ALB
+resource "aws_lb" "this" {
+  name                       = "alb"
+  internal                   = false
+  load_balancer_type         = "application"
+  ip_address_type            = "ipv4"
+  enable_deletion_protection = false
+  security_groups            = [module.sg_alb.security_group_id]
+  subnets                    = module.vpc.public_subnets
+  tags                       = var.desc_tags
+}
+
+# Target Group
+resource "aws_lb_target_group" "qr" {
+  name                 = "tg-qr"
+  port                 = 3000
+  protocol             = "HTTP"
+  target_type          = "instance"
+  vpc_id               = module.vpc.vpc_id
+  deregistration_delay = 60
+  tags                 = var.desc_tags
+}
+resource "aws_lb_target_group_attachment" "qr" {
+  target_group_arn = aws_lb_target_group.qr.arn
+  target_id        = module.ec2_qr.id
+}
+
+# Target Group
+resource "aws_lb_target_group" "tosios" {
+  name                 = "tg-tosios"
+  port                 = 3001
+  protocol             = "HTTP"
+  target_type          = "instance"
+  vpc_id               = module.vpc.vpc_id
+  deregistration_delay = 60
+  tags                 = var.desc_tags
+}
+resource "aws_lb_target_group_attachment" "tosios" {
+  target_group_arn = aws_lb_target_group.tosios.arn
+  target_id        = module.ec2_tosios.id
+}
+
+# Target Group
+resource "aws_lb_target_group" "bia" {
+  name                 = "tg-bia"
+  port                 = 3001
+  protocol             = "HTTP"
+  target_type          = "instance"
+  vpc_id               = module.vpc.vpc_id
+  deregistration_delay = 60
+  tags                 = var.desc_tags
+}
+resource "aws_lb_target_group_attachment" "bia" {
+  target_group_arn = aws_lb_target_group.bia.arn
+  target_id        = module.ec2_prod.id
+}
+
+# Listener HTTP 80
+resource "aws_lb_listener" "listener80" {
+  load_balancer_arn = aws_lb.this.arn
+  port              = "80"
+  protocol          = "HTTP"
+  tags              = var.desc_tags
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.bia.arn
+  }
+}
+
+# Rule Listener
+resource "aws_lb_listener_rule" "qr" {
+  listener_arn = aws_lb_listener.listener80.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.qr.arn
+  }
+
+  condition {
+    host_header {
+      values = ["qr.brunofreitas.tec.br"]
+    }
+  }
+}
+
+# Rule Listener
+resource "aws_lb_listener_rule" "tosios" {
+  listener_arn = aws_lb_listener.listener80.arn
+  priority     = 101
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tosios.arn
+  }
+
+  condition {
+    host_header {
+      values = ["tosios.brunofreitas.tec.br"]
+    }
+  }
+}
+
+# Rule Listener
+resource "aws_lb_listener_rule" "bia" {
+  listener_arn = aws_lb_listener.listener80.arn
+  priority     = 102
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.bia.arn
+  }
+
+  condition {
+    host_header {
+      values = ["bia.brunofreitas.tec.br"]
+    }
+  }
+}
+
+#DNS Record
+resource "aws_route53_record" "qr" {
+  zone_id = var.domain
+  name    = "qr"
+  type    = "CNAME"
+  ttl     = 300
+  records = [aws_lb.this.dns_name]
+}
+
+#DNS Record
+resource "aws_route53_record" "tosios" {
+  zone_id = var.domain
+  name    = "tosios"
+  type    = "CNAME"
+  ttl     = 300
+  records = [aws_lb.this.dns_name]
+}
+
+#DNS Record
+resource "aws_route53_record" "bia" {
+  zone_id = var.domain
+  name    = "bia"
+  type    = "CNAME"
+  ttl     = 300
+  records = [aws_lb.this.dns_name]
 }

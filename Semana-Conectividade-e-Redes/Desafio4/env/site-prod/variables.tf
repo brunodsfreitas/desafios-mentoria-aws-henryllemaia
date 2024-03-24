@@ -301,11 +301,6 @@ variable "sg4_ingress_with_cidr_blocks1" {
   description = "sg4_ingress_with_cidr_blocks1"
   default     = null
 }
-variable "sg4_ingress_with_cidr_blocks2" {
-  type        = list(map(string))
-  description = "sg4_ingress_with_cidr_blocks2"
-  default     = null
-}
 variable "sg4_egress_with_cidr_blocks1" {
   type        = list(map(string))
   description = "sg4_egress_with_cidr_blocks1"
@@ -333,6 +328,30 @@ variable "sg5_ingress_with_cidr_blocks1" {
 variable "sg5_egress_with_cidr_blocks1" {
   type        = list(map(string))
   description = "sg5_egress_with_cidr_blocks1"
+  default     = null
+}
+
+###############
+### alb
+###############
+variable "sg6_name" {
+  type        = string
+  description = "sg6_name"
+  default     = null
+}
+variable "sg6_description" {
+  type        = string
+  description = "sg6_description"
+  default     = null
+}
+variable "sg6_ingress_with_cidr_blocks1" {
+  type        = list(map(string))
+  description = "sg6_ingress_with_cidr_blocks1"
+  default     = null
+}
+variable "sg6_egress_with_cidr_blocks1" {
+  type        = list(map(string))
+  description = "sg6_egress_with_cidr_blocks1"
   default     = null
 }
 

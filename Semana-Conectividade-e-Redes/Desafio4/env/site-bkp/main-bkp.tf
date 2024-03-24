@@ -4,10 +4,10 @@ terraform {
   }
 }
 
-module "vpc_backup" { #https://github.com/terraform-aws-modules/terraform-aws-vpc
+module "vpc_backup" {
   source = "../../modules/vpc"
 
-  name = "${var.desc_tags.project}"
+  name = var.desc_tags.project
   cidr = var.vpc_cidr_block
 
   azs            = var.subnet_availability_zones
@@ -33,19 +33,18 @@ module "vpc_backup" { #https://github.com/terraform-aws-modules/terraform-aws-vp
   public_subnet_enable_resource_name_dns_a_record_on_launch = true
 }
 
-module "sg_ec2_backup" { #https://github.com/terraform-aws-modules/terraform-aws-security-group
+module "sg_ec2_backup" {
   source = "../../modules/sg"
 
   name        = "${var.desc_tags.project}-sg-${var.sg1_name}"
   description = var.sg1_description
   vpc_id      = module.vpc_backup.vpc_id
 
-  ingress_cidr_blocks      = [module.vpc_backup.vpc_cidr_block]
-  #ingress_with_cidr_blocks = var.sg1_ingress_with_cidr_blocks1
-  egress_with_cidr_blocks  = var.sg1_egress_with_cidr_blocks1
+  ingress_cidr_blocks     = [module.vpc_backup.vpc_cidr_block]
+  egress_with_cidr_blocks = var.sg1_egress_with_cidr_blocks1
 }
 
-module "ec2_instance_backup" { #https://github.com/terraform-aws-modules/terraform-aws-ec2-instance
+module "ec2_instance_backup" {
   source                 = "../../modules/ec2"
   vpc_security_group_ids = [module.sg_ec2_backup.security_group_id]
   name                   = "${var.desc_tags.project}-${var.ec2_name}"
@@ -80,4 +79,3 @@ resource "aws_ebs_volume" "ebs_backup_data" {
   throughput        = 125
   tags              = merge({ "Name" = "${var.desc_tags.project}-ebs-${var.ebs_name}" }, var.desc_tags)
 }
-

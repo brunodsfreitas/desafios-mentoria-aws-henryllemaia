@@ -21,10 +21,10 @@ if ! [ $# -ne 2 ]; then
             openssl enc -aes-256-cbc -salt -in env/site-prod/site-prod.tfvars -out env/site-prod/site-prod.enc -k "$2" -pbkdf2 -iter 10000
         fi
 
-        if [ ! -f "env/site-bkp/site-backup.enc" ]; then
+        if [ ! -f "env/site-backup/site-backup.enc" ]; then
             echo "arquivo nao existe bkp"
         else
-            openssl enc -aes-256-cbc -salt -in env/site-bkp/site-backup.tfvars -out env/site-bkp/site-backup.enc -k "$2" -pbkdf2 -iter 10000
+            openssl enc -aes-256-cbc -salt -in env/site-backup/site-backup.tfvars -out env/site-backup/site-backup.enc -k "$2" -pbkdf2 -iter 10000
         fi
     elif [ $1 = "dec" ]; then
         if [ ! -f "env/site-prod/site-prod.enc" ]; then
@@ -33,10 +33,10 @@ if ! [ $# -ne 2 ]; then
             openssl enc -aes-256-cbc -d -in env/site-prod/site-prod.enc -out env/site-prod/site-prod.tfvars -k "$2" -pbkdf2 -iter 10000
         fi
 
-        if [ ! -f "env/site-bkp/site-backup.enc" ]; then
+        if [ ! -f "env/site-backup/site-backup.enc" ]; then
             echo "arquivo nao existe bkp"
         else
-            openssl enc -aes-256-cbc -d -in env/site-bkp/site-backup.enc -out env/site-bkp/site-backup.tfvars -k "$2" -pbkdf2 -iter 10000
+            openssl enc -aes-256-cbc -d -in env/site-backup/site-backup.enc -out env/site-backup/site-backup.tfvars -k "$2" -pbkdf2 -iter 10000
         fi
     else 
         exit 0

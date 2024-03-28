@@ -37,7 +37,7 @@ module "vpc_ssm" {
 
   azs             = var.subnet_availability_zones
   private_subnets = var.vpc2_private_subnets
-  public_subnets = var.vpc2_public_subnets
+  public_subnets  = var.vpc2_public_subnets
 
   tags = var.desc_tags
 
@@ -86,8 +86,8 @@ module "vpc_ssm_endpoints" {
   name = "${var.desc_tags.project}-vpc-ssm-endpoints"
   cidr = var.vpc4_cidr_block
 
-  azs            = var.subnet_availability_zones
-  public_subnets = var.vpc4_public_subnets
+  azs             = var.subnet_availability_zones
+  public_subnets  = var.vpc4_public_subnets
   private_subnets = var.vpc4_private_subnets
 
   tags = var.desc_tags

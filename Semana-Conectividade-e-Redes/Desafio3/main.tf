@@ -41,13 +41,13 @@ module "application_qrcode" {
   desc_tags = var.desc_tags
 
   #Module core_infrastructure
-  autoscaling_group_name     = module.core_infrastructure.module_info.autoscaling_group_name
-  vpc_id_for_tg              = module.core_infrastructure.module_info.vpc_id
-  alb_arn_to_listener        = module.core_infrastructure.module_info.alb_arn
-  cluster_id_for_service     = module.core_infrastructure.module_info.cluster_id
-  alb_dns_name_to_dns_record = module.core_infrastructure.module_info.alb_dns_name
-  domain                     = var.domain
-  target_group_desafio2_bia_arn  = module.application_tosios.target_group_desafio2_bia_arn
+  autoscaling_group_name        = module.core_infrastructure.module_info.autoscaling_group_name
+  vpc_id_for_tg                 = module.core_infrastructure.module_info.vpc_id
+  alb_arn_to_listener           = module.core_infrastructure.module_info.alb_arn
+  cluster_id_for_service        = module.core_infrastructure.module_info.cluster_id
+  alb_dns_name_to_dns_record    = module.core_infrastructure.module_info.alb_dns_name
+  domain                        = var.domain
+  target_group_desafio2_bia_arn = module.application_tosios.target_group_desafio2_bia_arn
 
   depends_on = [module.core_infrastructure]
 }
@@ -70,15 +70,15 @@ module "application_tosios" {
   desc_tags = var.desc_tags
 
   #Module core_infrastructure
-  autoscaling_group_name      = module.core_infrastructure.module_info.autoscaling_group_name
-  vpc_id_for_tg               = module.core_infrastructure.module_info.vpc_id
-  alb_arn_to_listener         = module.core_infrastructure.module_info.alb_arn
-  cluster_id_for_service      = module.core_infrastructure.module_info.cluster_id
-  alb_dns_name_to_dns_record  = module.core_infrastructure.module_info.alb_dns_name
-  app_bia_instance_id         = module.core_infrastructure.module_info.app_bia_instance_id
-  domain                      = var.domain
-  app_qrcode_target_group_arn = module.application_qrcode.app_qrcode_target_group_arn
-  app_qrcode_listener_arn     = module.application_qrcode.app_qrcode_listener_arn
+  autoscaling_group_name          = module.core_infrastructure.module_info.autoscaling_group_name
+  vpc_id_for_tg                   = module.core_infrastructure.module_info.vpc_id
+  alb_arn_to_listener             = module.core_infrastructure.module_info.alb_arn
+  cluster_id_for_service          = module.core_infrastructure.module_info.cluster_id
+  alb_dns_name_to_dns_record      = module.core_infrastructure.module_info.alb_dns_name
+  app_bia_instance_id             = module.core_infrastructure.module_info.app_bia_instance_id
+  domain                          = var.domain
+  app_qrcode_target_group_arn     = module.application_qrcode.app_qrcode_target_group_arn
+  app_qrcode_listener_arn         = module.application_qrcode.app_qrcode_listener_arn
   bastion_host_instance_public_ip = module.core_infrastructure.module_info.bastion_host_instance_public_ip
 
   depends_on = [module.core_infrastructure]

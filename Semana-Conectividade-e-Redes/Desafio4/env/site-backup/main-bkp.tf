@@ -10,8 +10,8 @@ module "vpc_backup" {
   name = var.desc_tags.project
   cidr = var.vpc_cidr_block
 
-  azs            = var.subnet_availability_zones
-  public_subnets = var.public_subnets
+  azs             = var.subnet_availability_zones
+  public_subnets  = var.public_subnets
   private_subnets = var.private_subnets
 
   public_inbound_acl_rules   = var.public_inbound_acl_rules

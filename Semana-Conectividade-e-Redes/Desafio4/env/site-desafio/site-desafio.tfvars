@@ -28,11 +28,11 @@ vpc4_cidr_block = "10.30.0.0/16"
 ###########################################################################
 # VPC - Subnets
 ###########################################################################
-vpc2_private_subnets           = ["10.20.2.0/24"]
-vpc4_private_subnets            = ["10.30.50.0/24"]
+vpc2_private_subnets      = ["10.20.2.0/24"]
+vpc4_private_subnets      = ["10.30.50.0/24"]
 public_subnets            = ["10.25.3.0/24"]
-vpc2_public_subnets            = ["10.20.200.0/24"]
-vpc4_public_subnets            = ["10.30.110.0/24"]
+vpc2_public_subnets       = ["10.20.200.0/24"]
+vpc4_public_subnets       = ["10.30.110.0/24"]
 intra_subnets             = ["10.15.1.0/24"]
 subnet_availability_zones = ["us-east-2a"]
 public_inbound_acl_rules = [

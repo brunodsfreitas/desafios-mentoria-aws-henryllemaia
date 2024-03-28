@@ -185,9 +185,9 @@ module "sg_instance_connect_endpoint" {
   description = var.sg7_description
   vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks      = [module.vpc.vpc_cidr_block]
+  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
   #ingress_with_cidr_blocks = var.sg7_ingress_with_cidr_blocks1
-  egress_with_cidr_blocks  = var.sg7_egress_with_cidr_blocks1
+  egress_with_cidr_blocks = var.sg7_egress_with_cidr_blocks1
 }
 
 resource "aws_ec2_instance_connect_endpoint" "eice" {

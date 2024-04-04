@@ -5,7 +5,8 @@ terraform {
 }
 
 module "vpc_ssm_endpoints" {
-  source = "../../modules/vpc"
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.7.0"
 
   name = "${var.desc_tags.project}-vpc-ssm-endpoints"
   cidr = var.vpc4_cidr_block
@@ -31,7 +32,8 @@ module "vpc_ssm_endpoints" {
 }
 
 module "sg_endpoints" {
-  source = "../../modules/sg"
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "5.1.2"
 
   name        = "${var.desc_tags.project}-sg-${var.sg5_name}"
   description = var.sg5_description
@@ -77,7 +79,8 @@ resource "aws_vpc_endpoint" "ec2_messages" {
 }
 
 module "sg_ec2_ssm_endpoints" {
-  source = "../../modules/sg"
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "5.1.2"
 
   name        = "${var.desc_tags.project}-sg-${var.sg6_name}"
   description = var.sg6_description
@@ -89,7 +92,8 @@ module "sg_ec2_ssm_endpoints" {
 }
 
 module "ec2_ssm_endpoints" {
-  source                 = "../../modules/ec2"
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "5.6.1"
   vpc_security_group_ids = [module.sg_ec2_ssm_endpoints.security_group_id]
   name                   = "${var.desc_tags.project}-${var.ec2_4_name}"
   instance_type          = var.ec2_4_instance_type

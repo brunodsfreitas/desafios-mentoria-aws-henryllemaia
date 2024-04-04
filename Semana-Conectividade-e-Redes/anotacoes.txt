@@ -63,7 +63,7 @@ aws ec2-instance-connect ssh --instance-id i-005332ecba8aaeca1 (apenas no clouds
 
 aws ssm start-session --target i-005332ecba8aaeca1 --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters '{"host":["10.15.80.98"],"portNumber":["5432"],"localPortNumber":["5435"]}' --region us-east-2 --profile brunofreitas-UbuntuHome
 
-aws ssm start-session --target i-005332ecba8aaeca1
+aws ssm start-session --target i-07e88d11d31891b4d
 
 aws ssm start-session --target i-01d6492abd56ea793 --region eu-north-1
 

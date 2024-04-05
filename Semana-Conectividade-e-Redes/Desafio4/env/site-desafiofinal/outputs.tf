@@ -4,17 +4,17 @@
 
 output "cluster_arn" {
   description = "ARN that identifies the cluster"
-  value       = module.ecs_cluster.arn
+  value       = module.ecs_cluster.cluster_arn
 }
 
 output "cluster_id" {
   description = "ID that identifies the cluster"
-  value       = module.ecs_cluster.id
+  value       = module.ecs_cluster.cluster_id
 }
 
 output "cluster_name" {
   description = "Name that identifies the cluster"
-  value       = module.ecs_cluster.name
+  value       = module.ecs_cluster.cluster_name
 }
 
 output "cluster_capacity_providers" {

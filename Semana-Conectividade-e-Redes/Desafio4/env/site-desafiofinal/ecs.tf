@@ -1,30 +1,15 @@
 
-locals {
-  region = "eu-west-1"
-  name   = "ex-${basename(path.cwd)}"
-
-  vpc_cidr = "10.0.0.0/16"
-  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
-
-  container_name = "ecs-sample"
-  container_port = 80
-
-  tags = {
-    Name       = local.name
-    Example    = local.name
-    Repository = "https://github.com/terraform-aws-modules/terraform-aws-ecs"
-  }
-}
-
 ################################################################################
 # Cluster
 ################################################################################
 
 module "ecs_cluster" {
   source  = "terraform-aws-modules/ecs/aws"
-  version = "5.11.0"
+  version = "~> 5.11"
 
   cluster_name = var.ecs_name
+
+  task_exec_iam_role_name = "role-acesso-ssm"
 
   # Capacity provider - autoscaling groups
   default_capacity_provider_use_fargate = false
@@ -73,14 +58,17 @@ module "ecs_cluster" {
 
 module "ecs_service" {
   source  = "terraform-aws-modules/ecs/aws//modules/service"
-  version = "5.11.0"
+  version = "~> 5.11"
 
   # Service
   name        = var.ecs_service_1_name
-  cluster_arn = module.ecs_cluster.arn
+  cluster_arn = module.ecs_cluster.cluster_arn
 
   # Task Definition
   requires_compatibilities = ["EC2"]
+  cpu = 768  # Valor em unidades de CPU
+  memory = 768  # Valor em megabytes
+  network_mode = "bridge"
   capacity_provider_strategy = {
     # On-demand instances
     workers_green = {
@@ -90,28 +78,30 @@ module "ecs_service" {
     }
   }
 
-  volume = {
-    my-vol = {}
-  }
+  #volume = {
+  #  my-vol = {}
+  #}
 
   # Container definition(s)
   container_definitions = {
-    (bia) = {
+    ("bia") = {
       image = "public.ecr.aws/ecs-sample-image/amazon-ecs-sample:latest"
       port_mappings = [
         {
           name          = "bia"
-          containerPort = "8080"
+          containerPort = 80
           protocol      = "tcp"
         }
       ]
+      cpu = 256  # Valor em unidades de CPU (1 vCPU = 1024 unidades de CPU)
+      memory = 256  # Valor em megabytes
 
-      mount_points = [
-        {
-          sourceVolume  = "my-vol",
-          containerPath = "/var/www/my-vol"
-        }
-      ]
+      #mount_points = [
+      #  {
+      #    sourceVolume  = "my-vol",
+      #    containerPath = "/var/www/my-vol"
+      #  }
+      #]
 
       entry_point = ["/usr/sbin/apache2", "-D", "FOREGROUND"]
 
@@ -131,9 +121,9 @@ module "ecs_service" {
 
   load_balancer = {
     service = {
-      target_group_arn = module.alb.target_groups["ex_ecs"].arn
-      container_name   = local.container_name
-      container_port   = local.container_port
+      target_group_arn = module.alb.target_groups["bia"].arn
+      container_name   = "bia"
+      container_port   = 80
     }
   }
 
@@ -141,8 +131,8 @@ module "ecs_service" {
   security_group_rules = {
     alb_http_ingress = {
       type                     = "ingress"
-      from_port                = local.container_port
-      to_port                  = local.container_port
+      from_port                = 80
+      to_port                  = 80
       protocol                 = "tcp"
       description              = "Service port"
       source_security_group_id = module.alb.security_group_id
@@ -155,11 +145,6 @@ module "ecs_service" {
 ################################################################################
 # Supporting Resources
 ################################################################################
-
-# https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html#ecs-optimized-ami-linux
-data "aws_ssm_parameter" "ecs_optimized_ami" {
-  name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended"
-}
 
 module "alb" {
   source  = "terraform-aws-modules/alb/aws"
@@ -192,7 +177,7 @@ module "alb" {
   }
 
   listeners = {
-    ex_http = {
+    bia_http = {
       port     = 80
       protocol = "HTTP"
 
@@ -206,8 +191,8 @@ module "alb" {
     bia = {
       backend_protocol                  = "HTTP"
       backend_port                      = 80
-      target_type                       = "ip"
-      deregistration_delay              = 5
+      target_type                       = "instance"
+      deregistration_delay              = 10
       load_balancing_cross_zone_enabled = true
 
       health_check = {
@@ -230,6 +215,9 @@ module "alb" {
 
   tags = var.desc_tags
 }
+
+
+
 
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
@@ -295,7 +283,7 @@ module "autoscaling_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"
 
-  name        = local.name
+  name        = "${var.ecs_name}-sg"
   description = "Autoscaling group security group"
   vpc_id      = module.vpc.vpc_id
 
@@ -310,4 +298,13 @@ module "autoscaling_sg" {
   egress_rules = ["all-all"]
 
   tags = var.desc_tags
+}
+
+################################################################################
+# Data
+################################################################################
+
+# https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html#ecs-optimized-ami-linux
+data "aws_ssm_parameter" "ecs_optimized_ami" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended"
 }

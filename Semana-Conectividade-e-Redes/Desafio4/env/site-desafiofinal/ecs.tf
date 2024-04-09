@@ -48,7 +48,6 @@ module "ecs_cluster" {
     #  }
     #}
   }
-
   tags = var.desc_tags
 }
 
@@ -85,7 +84,9 @@ module "ecs_service" {
   # Container definition(s)
   container_definitions = {
     ("bia") = {
-      image = "public.ecr.aws/ecs-sample-image/amazon-ecs-sample:latest"
+      #image = "public.ecr.aws/ecs-sample-image/amazon-ecs-sample:latest"
+      image = "${aws_ecr_repository.ecr.repository_url}:latest"
+      #993087404463.dkr.ecr.us-east-2.amazonaws.com/semanaconectividadeaws_ecr
       port_mappings = [
         {
           name          = "bia"
@@ -103,7 +104,7 @@ module "ecs_service" {
       #  }
       #]
 
-      entry_point = ["/usr/sbin/apache2", "-D", "FOREGROUND"]
+      entry_point = ["tail -f /dev/null"]
 
       # Example image used requires access to write to root filesystem
       readonly_root_filesystem = false
@@ -140,6 +141,7 @@ module "ecs_service" {
   }
 
   tags = var.desc_tags
+  depends_on = [aws_ecr_repository.ecr]
 }
 
 ################################################################################

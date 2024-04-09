@@ -130,3 +130,11 @@ output "service_autoscaling_scheduled_actions" {
   description = "Map of autoscaling scheduled actions and their attributes"
   value       = module.ecs_service.autoscaling_scheduled_actions
 }
+
+################################################################################
+# ECR
+################################################################################
+output "ecr_repository_url" {
+  description = "ECR URL"
+  value = aws_ecr_repository.ecr.repository_url 
+}

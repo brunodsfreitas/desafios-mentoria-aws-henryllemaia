@@ -474,3 +474,9 @@ variable "as_desired_capacity" {
   description = "as_desired_capacity"
   default     = 2
 }
+
+variable "ecr_repository" {
+  type        = string
+  description = "ecr_repository"
+  default     = null
+}

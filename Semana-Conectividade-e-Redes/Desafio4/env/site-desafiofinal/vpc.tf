@@ -25,3 +25,7 @@ module "vpc" {
   public_subnet_enable_resource_name_dns_a_record_on_launch  = true
   private_subnet_enable_resource_name_dns_a_record_on_launch = true
 }
+
+resource "aws_ecr_repository" "ecr" {
+  name = lower("${var.ecr_repository}")
+}

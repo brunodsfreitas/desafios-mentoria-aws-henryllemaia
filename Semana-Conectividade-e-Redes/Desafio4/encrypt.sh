@@ -12,6 +12,9 @@
 #openssl enc -aes-256-cbc -d -in "$ENCRYPTED_FILE_PATH" -out "${ENCRYPTED_FILE_PATH%.enc}" -k "$SECRET_VALUE"
 
 
+#openssl enc -aes-256-cbc -salt -in env/site-desafiofinal/terraform.tfvars -out env/site-desafiofinal/terraform.enc -k "$2" -pbkdf2 -iter 10000
+openssl enc -aes-256-cbc -salt -in env/site-desafiofinal/terraform.tfvars -out env/site-desafiofinal/vars.enc -k "$2" -pbkdf2 -iter 10000
+openssl enc -aes-256-cbc -d -in env/site-desafiofinal/vars.enc -out env/site-desafiofinal/terraform.tfvars -k "$2" -pbkdf2 -iter 10000
 #!/bin/bash
 if ! [ $# -ne 2 ]; then
     if [ $1 = "enc" ]; then

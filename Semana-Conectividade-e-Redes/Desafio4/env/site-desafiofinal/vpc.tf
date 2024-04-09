@@ -21,7 +21,7 @@ module "vpc" {
   public_dedicated_network_acl                               = false
   private_dedicated_network_acl                              = false
   map_public_ip_on_launch                                    = true
-  intra_subnet_enable_resource_name_dns_a_record_on_launch   = false
+  intra_subnet_enable_resource_name_dns_a_record_on_launch   = true
   public_subnet_enable_resource_name_dns_a_record_on_launch  = true
   private_subnet_enable_resource_name_dns_a_record_on_launch = true
 }

@@ -7,8 +7,7 @@ module "ecs_cluster" {
   source  = "terraform-aws-modules/ecs/aws"
   version = "~> 5.11"
 
-  cluster_name = var.ecs_name
-
+  cluster_name            = var.ecs_name
   task_exec_iam_role_name = "role-acesso-ssm"
 
   # Capacity provider - autoscaling groups
@@ -18,14 +17,12 @@ module "ecs_cluster" {
     workers_green = {
       auto_scaling_group_arn         = module.autoscaling["workers_green"].autoscaling_group_arn
       managed_termination_protection = "ENABLED"
-
       managed_scaling = {
         maximum_scaling_step_size = 2
         minimum_scaling_step_size = 1
         status                    = "ENABLED"
         target_capacity           = 70
       }
-
       default_capacity_provider_strategy = {
         weight = 70
         base   = 20
@@ -65,9 +62,9 @@ module "ecs_service" {
 
   # Task Definition
   requires_compatibilities = ["EC2"]
-  cpu = 768  # Valor em unidades de CPU
-  memory = 768  # Valor em megabytes
-  network_mode = "bridge"
+  cpu                      = 768 # Valor em unidades de CPU
+  memory                   = 768 # Valor em megabytes
+  network_mode             = "bridge"
   capacity_provider_strategy = {
     # On-demand instances
     workers_green = {
@@ -94,8 +91,8 @@ module "ecs_service" {
           protocol      = "tcp"
         }
       ]
-      cpu = 256  # Valor em unidades de CPU (1 vCPU = 1024 unidades de CPU)
-      memory = 256  # Valor em megabytes
+      cpu    = 256 # Valor em unidades de CPU (1 vCPU = 1024 unidades de CPU)
+      memory = 256 # Valor em megabytes
 
       #mount_points = [
       #  {
@@ -140,12 +137,12 @@ module "ecs_service" {
     }
   }
 
-  tags = var.desc_tags
+  tags       = var.desc_tags
   depends_on = [aws_ecr_repository.ecr]
 }
 
 ################################################################################
-# Supporting Resources
+# ALB
 ################################################################################
 
 module "alb" {

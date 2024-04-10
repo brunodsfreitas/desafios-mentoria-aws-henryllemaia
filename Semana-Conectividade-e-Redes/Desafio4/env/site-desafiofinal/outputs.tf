@@ -136,5 +136,13 @@ output "service_autoscaling_scheduled_actions" {
 ################################################################################
 output "ecr_repository_url" {
   description = "ECR URL"
-  value = aws_ecr_repository.ecr.repository_url 
+  value       = aws_ecr_repository.ecr.repository_url
+}
+
+
+#organizar
+
+output "IP_RANGE_EICE" {
+  description = "EC2 Instance Connect Endpoint AWS IP Ranges"
+  value       = data.external.get_ip_range_eiec.result
 }

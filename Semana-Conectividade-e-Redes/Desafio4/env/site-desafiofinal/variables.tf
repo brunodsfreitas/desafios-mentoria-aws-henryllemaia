@@ -480,3 +480,9 @@ variable "ecr_repository" {
   description = "ecr_repository"
   default     = null
 }
+
+variable "eice_ip_range" {
+  type        = map(string)
+  description = "eice_ip_range"
+  default     = null
+}

@@ -282,19 +282,29 @@ module "autoscaling_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"
 
-  name        = "${var.ecs_name}-sg"
+  name        = "${var.ecs_name}-sg-autoscaling"
   description = "Autoscaling group security group"
   vpc_id      = module.vpc.vpc_id
 
-  computed_ingress_with_source_security_group_id = [
+  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  ingress_with_cidr_blocks = [
     {
-      rule                     = "http-80-tcp"
-      source_security_group_id = module.alb.security_group_id
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "allow all (ipv4)"
+      cidr_blocks = "0.0.0.0/0"
     }
   ]
-  number_of_computed_ingress_with_source_security_group_id = 1
-
-  egress_rules = ["all-all"]
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "allow all out (ipv4)"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
 
   tags = var.desc_tags
 }

@@ -2,7 +2,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.7"
 
-  name = "${var.desc_tags.project}-vpc-ssm-public"
+  name = "${var.desc_tags.project}-vpc-desafio4"
   cidr = var.vpc_cidr_block
 
   azs             = var.subnet_availability_zones
@@ -35,11 +35,11 @@ resource "aws_ecr_repository" "ecr" {
 ################################################################################
 
 resource "aws_vpc_endpoint" "ecr_endpoint" {
-  vpc_id             = module.vpc.vpc_id
-  service_name       = "com.amazonaws.${var.region}.ecr.dkr"
-  security_group_ids = [module.sg_ecr_endpoint.security_group_id]
-  subnet_ids         = module.vpc.private_subnets
-  vpc_endpoint_type = "Interface"
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${var.region}.ecr.dkr"
+  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
+  subnet_ids          = module.vpc.private_subnets
+  vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
 }
 
@@ -62,15 +62,18 @@ resource "aws_security_group_rule" "eiec_sg_rules" {
   cidr_blocks       = [element(keys(data.external.get_ip_range_eiec.result), count.index)]
 }
 
-resource "aws_route_table_association" "eice_rt_association" {
-  count          = length(module.vpc.private_subnets)
-  subnet_id      = module.vpc.private_subnets[count.index]
-  route_table_id = aws_route_table.rt_endpoints.id
-}
 
-resource "aws_route_table" "rt_endpoints" {
-  vpc_id = module.vpc.vpc_id
-}
+#deletar
+#resource "aws_route_table_association" "eice_rt_association" {
+#  count          = length(module.vpc.private_subnets)
+#  subnet_id      = module.vpc.private_subnets[count.index]
+#  route_table_id = aws_route_table.rt_endpoints.id
+#}
+
+#deletar
+#resource "aws_route_table" "rt_endpoints" {
+#  vpc_id = module.vpc.vpc_id
+#}
 
 #resource "aws_route" "eice_route" {
 #  count                  = length(module.vpc.private_route_table_ids) * length(data.external.get_ip_range_eiec.result)
@@ -89,49 +92,49 @@ module "sg_eice" {
 
   ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
   ingress_with_cidr_blocks = [
-  {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    description = "allow all (ipv4)"
-    cidr_blocks = "0.0.0.0/0"
-  }
-]
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "allow all (ipv4)"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
   egress_with_cidr_blocks = [
-  {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    description = "allow all out (ipv4)"
-    cidr_blocks = "0.0.0.0/0"
-  }
-]
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "allow all out (ipv4)"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
 }
 
 module "sg_ecr_endpoint" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "5.1.2"
 
-  name        = "${var.desc_tags.project}-sg-ecr"
-  description = "sg-ecr"
-  vpc_id      = module.vpc.vpc_id
+  name                = "${var.desc_tags.project}-sg-ecr"
+  description         = "sg-ecr"
+  vpc_id              = module.vpc.vpc_id
   ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
   ingress_with_cidr_blocks = [
-  {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    description = "allow all (ipv4)"
-    cidr_blocks = "0.0.0.0/0"
-  }
-]
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "allow all (ipv4)"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
   egress_with_cidr_blocks = [
-  {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    description = "allow all out (ipv4)"
-    cidr_blocks = "0.0.0.0/0"
-  }
-]
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "allow all out (ipv4)"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
 }

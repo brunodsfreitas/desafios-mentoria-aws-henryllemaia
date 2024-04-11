@@ -37,15 +37,16 @@ resource "aws_ecr_repository" "ecr" {
 resource "aws_vpc_endpoint" "ecr_endpoint" {
   vpc_id             = module.vpc.vpc_id
   service_name       = "com.amazonaws.${var.region}.ecr.dkr"
-  #security_group_ids = ["seguranca_group_id"]
+  security_group_ids = [module.sg_ecr_endpoint.security_group_id]
   subnet_ids         = module.vpc.private_subnets
+  vpc_endpoint_type = "Interface"
+  private_dns_enabled = true
 }
 
-#resource "aws_route" "ecr_route" {
-#  route_table_id         = module.vpc.private_route_table_ids
-#  destination_cidr_block = "0.0.0.0/0" # Ou a CIDR específica para o Amazon ECR
-#  vpc_endpoint_id        = aws_vpc_endpoint.ecr_endpoint.id
-#}
+resource "aws_ec2_instance_connect_endpoint" "eice" {
+  subnet_id          = module.vpc.private_subnets[0]
+  security_group_ids = [module.sg_eice.security_group_id]
+}
 
 data "external" "get_ip_range_eiec" {
   program = ["bash", "${path.module}/get_ip_range_aws_services.sh", "${var.region}", "EC2_INSTANCE_CONNECT"]
@@ -62,20 +63,75 @@ resource "aws_security_group_rule" "eiec_sg_rules" {
 }
 
 resource "aws_route_table_association" "eice_rt_association" {
-  count          = length(module.vpc.private_route_table_ids) * length(module.vpc.private_subnets)
-  subnet_id      = module.vpc.private_subnets[count.index % length(module.vpc.private_subnets)].id
-  route_table_id = module.vpc.private_route_table_ids[count.index / length(module.vpc.private_subnets)]
+  count          = length(module.vpc.private_subnets)
+  subnet_id      = module.vpc.private_subnets[count.index]
+  route_table_id = aws_route_table.rt_endpoints.id
 }
 
-resource "aws_route" "eice_route" {
-  count                  = length(module.vpc.private_route_table_ids) * length(data.external.get_ip_range_eiec.result)
-  route_table_id         = module.vpc.private_route_table_ids[count.index / length(data.external.get_ip_range_eiec.result)]
-  destination_cidr_block = keys(data.external.get_ip_range_eiec.result)[count.index % length(data.external.get_ip_range_eiec.result)]
-  vpc_endpoint_id        = aws_vpc_endpoint.ecr_endpoint.id
+resource "aws_route_table" "rt_endpoints" {
+  vpc_id = module.vpc.vpc_id
 }
 
-resource "aws_vpc_endpoint" "instance_connect" {
-  vpc_id            = module.vpc.vpc_id
-  service_name      = "com.amazonaws.${var.region}.ec2-instance-connect"
-  vpc_endpoint_type = "Gateway"
+#resource "aws_route" "eice_route" {
+#  count                  = length(module.vpc.private_route_table_ids) * length(data.external.get_ip_range_eiec.result)
+#  route_table_id         = module.vpc.private_route_table_ids[count.index / length(data.external.get_ip_range_eiec.result)]
+#  destination_cidr_block = keys(data.external.get_ip_range_eiec.result)[count.index % length(data.external.get_ip_range_eiec.result)]
+#  vpc_endpoint_id        = aws_vpc_endpoint.ecr_endpoint.id
+#}
+
+module "sg_eice" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "5.1.2"
+
+  name        = "${var.desc_tags.project}-sg-eice"
+  description = "sg-eice"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  ingress_with_cidr_blocks = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    description = "allow all (ipv4)"
+    cidr_blocks = "0.0.0.0/0"
+  }
+]
+  egress_with_cidr_blocks = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    description = "allow all out (ipv4)"
+    cidr_blocks = "0.0.0.0/0"
+  }
+]
+}
+
+module "sg_ecr_endpoint" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "5.1.2"
+
+  name        = "${var.desc_tags.project}-sg-ecr"
+  description = "sg-ecr"
+  vpc_id      = module.vpc.vpc_id
+  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  ingress_with_cidr_blocks = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    description = "allow all (ipv4)"
+    cidr_blocks = "0.0.0.0/0"
+  }
+]
+  egress_with_cidr_blocks = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    description = "allow all out (ipv4)"
+    cidr_blocks = "0.0.0.0/0"
+  }
+]
 }

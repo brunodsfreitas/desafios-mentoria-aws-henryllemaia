@@ -8,7 +8,8 @@ module "vpc" {
   azs             = var.subnet_availability_zones
   public_subnets  = var.public_subnets
   private_subnets = var.private_subnets
-  intra_subnets   = var.intra_subnets
+  #intra_subnets   = var.intra_subnets
+  database_subnets = var.database_subnets
 
   tags = var.desc_tags
 
@@ -52,89 +53,52 @@ data "external" "get_ip_range_eiec" {
   program = ["bash", "${path.module}/get_ip_range_aws_services.sh", "${var.region}", "EC2_INSTANCE_CONNECT"]
 }
 
-resource "aws_security_group_rule" "eiec_sg_rules" {
-  count             = length(keys(data.external.get_ip_range_eiec.result))
-  security_group_id = module.autoscaling_sg.security_group_id
-  type              = "egress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = [element(keys(data.external.get_ip_range_eiec.result), count.index)]
-}
+module "rds" {
+  source  = "terraform-aws-modules/rds/aws"
+  version = "~> 6.5"
 
+  identifier = lower("${var.desc_tags.project}-db-mysql")
 
-#deletar
-#resource "aws_route_table_association" "eice_rt_association" {
-#  count          = length(module.vpc.private_subnets)
-#  subnet_id      = module.vpc.private_subnets[count.index]
-#  route_table_id = aws_route_table.rt_endpoints.id
-#}
+  # All available versions: http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html#MySQL.Concepts.VersionMgmt
+  engine               = "mysql"
+  engine_version       = "8.0"
+  family               = "mysql8.0" # DB parameter group
+  major_engine_version = "8.0"      # DB option group
+  instance_class       = "db.t3.micro"
 
-#deletar
-#resource "aws_route_table" "rt_endpoints" {
-#  vpc_id = module.vpc.vpc_id
-#}
+  allocated_storage     = 20
+  max_allocated_storage = 25
 
-#resource "aws_route" "eice_route" {
-#  count                  = length(module.vpc.private_route_table_ids) * length(data.external.get_ip_range_eiec.result)
-#  route_table_id         = module.vpc.private_route_table_ids[count.index / length(data.external.get_ip_range_eiec.result)]
-#  destination_cidr_block = keys(data.external.get_ip_range_eiec.result)[count.index % length(data.external.get_ip_range_eiec.result)]
-#  vpc_endpoint_id        = aws_vpc_endpoint.ecr_endpoint.id
-#}
+  db_name  = "bia"
+  username = "admin"
+  port     = 3306
 
-module "sg_eice" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.2"
+  multi_az               = false
+  db_subnet_group_name   = module.vpc.database_subnet_group
+  vpc_security_group_ids = [module.sg_rds.security_group_id]
 
-  name        = "${var.desc_tags.project}-sg-eice"
-  description = "sg-eice"
-  vpc_id      = module.vpc.vpc_id
+  maintenance_window              = "Mon:00:00-Mon:03:00"
+  backup_window                   = "03:00-06:00"
+  enabled_cloudwatch_logs_exports = ["general"]
+  create_cloudwatch_log_group     = false
 
-  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
-  ingress_with_cidr_blocks = [
+  skip_final_snapshot = true
+  deletion_protection = false
+
+  performance_insights_enabled          = false
+  performance_insights_retention_period = 0
+  create_monitoring_role                = false
+  monitoring_interval                   = 0
+
+  parameters = [
     {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "allow all (ipv4)"
-      cidr_blocks = "0.0.0.0/0"
+      name  = "character_set_client"
+      value = "utf8mb4"
+    },
+    {
+      name  = "character_set_server"
+      value = "utf8mb4"
     }
   ]
-  egress_with_cidr_blocks = [
-    {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "allow all out (ipv4)"
-      cidr_blocks = "0.0.0.0/0"
-    }
-  ]
-}
-
-module "sg_ecr_endpoint" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.2"
-
-  name                = "${var.desc_tags.project}-sg-ecr"
-  description         = "sg-ecr"
-  vpc_id              = module.vpc.vpc_id
-  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
-  ingress_with_cidr_blocks = [
-    {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "allow all (ipv4)"
-      cidr_blocks = "0.0.0.0/0"
-    }
-  ]
-  egress_with_cidr_blocks = [
-    {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "allow all out (ipv4)"
-      cidr_blocks = "0.0.0.0/0"
-    }
-  ]
+  tags = var.desc_tags
 }

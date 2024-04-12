@@ -87,7 +87,7 @@ module "ecs_service" {
       port_mappings = [
         {
           name          = "bia"
-          containerPort = 80
+          containerPort = 8080
           protocol      = "tcp"
         }
       ]
@@ -121,7 +121,7 @@ module "ecs_service" {
     service = {
       target_group_arn = module.alb.target_groups["bia"].arn
       container_name   = "bia"
-      container_port   = 80
+      container_port   = 8080
     }
   }
 
@@ -129,13 +129,25 @@ module "ecs_service" {
   security_group_rules = {
     alb_http_ingress = {
       type                     = "ingress"
-      from_port                = 80
-      to_port                  = 80
+      from_port                = 8080
+      to_port                  = 8080
       protocol                 = "tcp"
       description              = "Service port"
       source_security_group_id = module.alb.security_group_id
     }
   }
+  #$$ validar a necessidade desse trecho iam abaixo
+  tasks_iam_role_name        = "${var.desc_tags.project}-tasks"
+  tasks_iam_role_description = "Example tasks IAM role"
+  tasks_iam_role_policies = {
+    ReadOnlyAccess = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+  }
+  tasks_iam_role_statements = [
+    {
+      actions   = ["ecr:*"]
+      resources = ["arn:aws:ecr:::*"]
+    }
+  ]
 
   tags       = var.desc_tags
   depends_on = [aws_ecr_repository.ecr]
@@ -162,8 +174,8 @@ module "alb" {
   # Security Group
   security_group_ingress_rules = {
     all_http = {
-      from_port   = 80
-      to_port     = 80
+      from_port   = 8080
+      to_port     = 8080
       ip_protocol = "tcp"
       cidr_ipv4   = "0.0.0.0/0"
     }
@@ -177,7 +189,7 @@ module "alb" {
 
   listeners = {
     bia_http = {
-      port     = 80
+      port     = 8080
       protocol = "HTTP"
 
       forward = {
@@ -189,7 +201,7 @@ module "alb" {
   target_groups = {
     bia = {
       backend_protocol                  = "HTTP"
-      backend_port                      = 80
+      backend_port                      = 8080
       target_type                       = "instance"
       deregistration_delay              = 10
       load_balancing_cross_zone_enabled = true
@@ -214,9 +226,6 @@ module "alb" {
 
   tags = var.desc_tags
 }
-
-
-
 
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
@@ -247,6 +256,7 @@ module "autoscaling" {
 
   security_groups                 = [module.autoscaling_sg.security_group_id]
   user_data                       = base64encode(each.value.user_data)
+  key_name                        = var.key_name
   ignore_desired_capacity_changes = true
 
   create_iam_instance_profile = true
@@ -255,6 +265,7 @@ module "autoscaling" {
   iam_role_policies = {
     AmazonEC2ContainerServiceforEC2Role = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
     AmazonSSMManagedInstanceCore        = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    AmazonEC2InstanceConnect            = "arn:aws:iam::aws:policy/EC2InstanceConnect"
   }
 
   vpc_zone_identifier = module.vpc.private_subnets
@@ -274,37 +285,6 @@ module "autoscaling" {
   # Spot instances
   use_mixed_instances_policy = each.value.use_mixed_instances_policy
   mixed_instances_policy     = each.value.mixed_instances_policy
-
-  tags = var.desc_tags
-}
-
-module "autoscaling_sg" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "~> 5.0"
-
-  name        = "${var.ecs_name}-sg-autoscaling"
-  description = "Autoscaling group security group"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
-  ingress_with_cidr_blocks = [
-    {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "allow all (ipv4)"
-      cidr_blocks = "0.0.0.0/0"
-    }
-  ]
-  egress_with_cidr_blocks = [
-    {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "allow all out (ipv4)"
-      cidr_blocks = "0.0.0.0/0"
-    }
-  ]
 
   tags = var.desc_tags
 }

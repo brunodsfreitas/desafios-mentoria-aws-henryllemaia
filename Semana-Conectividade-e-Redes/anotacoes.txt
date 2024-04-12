@@ -74,7 +74,7 @@ ssh -o "IdentitiesOnly=yes" -i .ssh/id_rsa.pub ec2-user@localhost -p 2222
 
 
 ## aplicar a chave authorized_hosts temporariamente para habilitar o acesso
-aws ec2-instance-connect send-ssh-public-key --instance-id i-005332ecba8aaeca1 --instance-os-user ec2-user --ssh-public-key file://.ssh/id_rsa.pub --availability-zone us-east-2c
+aws ec2-instance-connect send-ssh-public-key --instance-id i-0f22823e4ac5905bb --instance-os-user ec2-user --ssh-public-key file://.ssh/id_rsa.pub --availability-zone us-east-2a
 aws ec2-instance-connect send-ssh-public-key --instance-id i-005332ecba8aaeca1 --instance-os-user ec2-user --ssh-public-key file://Downloads/laboratorio-aws-2024-keys.pem --availability-zone us-east-2c
 
 aws ssm start-session --target i-005332ecba8aaeca1 --region us-east-2 --document-name AWS-StartInteractiveCommand --parameters "command=/bin/bash" --profile brunofreitas-UbuntuHome

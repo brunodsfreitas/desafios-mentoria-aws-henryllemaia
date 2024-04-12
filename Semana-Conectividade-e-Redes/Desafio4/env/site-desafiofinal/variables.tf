@@ -52,6 +52,12 @@ variable "intra_subnets" {
   default     = null
 }
 
+variable "database_subnets" {
+  type        = list(string)
+  description = "Database Subnets CIDR Block"
+  default     = null
+}
+
 variable "public_subnets" {
   type        = list(string)
   description = "Public Subnets CIDR Block"

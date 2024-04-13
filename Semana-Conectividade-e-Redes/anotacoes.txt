@@ -59,7 +59,7 @@ DNS failover
 
 Acesso Ec2 Instance Connect
 
-aws ec2-instance-connect ssh --instance-id i-005332ecba8aaeca1 (apenas no cloudshell)
+aws ec2-instance-connect ssh --instance-id i-0a988eac4cf0deae8 (apenas no cloudshell)
 
 aws ssm start-session --target i-005332ecba8aaeca1 --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters '{"host":["10.15.80.98"],"portNumber":["5432"],"localPortNumber":["5435"]}' --region us-east-2 --profile brunofreitas-UbuntuHome
 

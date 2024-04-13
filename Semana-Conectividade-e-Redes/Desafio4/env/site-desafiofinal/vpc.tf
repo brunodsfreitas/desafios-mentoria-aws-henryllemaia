@@ -25,6 +25,17 @@ module "vpc" {
   intra_subnet_enable_resource_name_dns_a_record_on_launch   = true
   public_subnet_enable_resource_name_dns_a_record_on_launch  = true
   private_subnet_enable_resource_name_dns_a_record_on_launch = true
+
+  # Cloudwatch log group and IAM role will be created
+  enable_flow_log                      = true
+  create_flow_log_cloudwatch_log_group = true
+  create_flow_log_cloudwatch_iam_role  = true
+
+  flow_log_max_aggregation_interval         = 60
+  flow_log_cloudwatch_log_group_name_prefix = "/${var.desc_tags.project}/"
+  flow_log_cloudwatch_log_group_name_suffix = "vpc-flow-logs"
+  #flow_log_cloudwatch_log_group_class       = "INFREQUENT_ACCESS"
+  flow_log_cloudwatch_log_group_class       = "STANDARD"
 }
 
 resource "aws_ecr_repository" "ecr" {
@@ -39,18 +50,54 @@ resource "aws_vpc_endpoint" "ecr_endpoint" {
   vpc_id              = module.vpc.vpc_id
   service_name        = "com.amazonaws.${var.region}.ecr.dkr"
   security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
-  subnet_ids          = module.vpc.private_subnets
+  subnet_ids          = [module.vpc.public_subnets[0]]
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ecr_api_endpoint" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${var.region}.ecr.api"
+  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
+  subnet_ids          = [module.vpc.public_subnets[0]]
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ecs_agent_endpoint" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${var.region}.ecs-agent"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
+  subnet_ids          = [module.vpc.public_subnets[0]]
+
+
+}
+
+resource "aws_vpc_endpoint" "ecs_telemetry_endpoint" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${var.region}.ecs-telemetry"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
+  subnet_ids          = [module.vpc.public_subnets[0]]
+
+}
+
+resource "aws_vpc_endpoint" "ecs_endpoint" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${var.region}.ecs"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
+  subnet_ids          = [module.vpc.public_subnets[0]]
+
 }
 
 resource "aws_ec2_instance_connect_endpoint" "eice" {
   subnet_id          = module.vpc.private_subnets[0]
   security_group_ids = [module.sg_eice.security_group_id]
-}
-
-data "external" "get_ip_range_eiec" {
-  program = ["bash", "${path.module}/get_ip_range_aws_services.sh", "${var.region}", "EC2_INSTANCE_CONNECT"]
 }
 
 module "rds" {
@@ -102,3 +149,24 @@ module "rds" {
   ]
   tags = var.desc_tags
 }
+/*
+resource "aws_route" "ecs_agent_route" {
+  count = module.vpc.private_route_table_ids
+  route_table_id            = module.vpc.private_route_table_ids[count.index]
+  vpc_endpoint_id           = aws_vpc_endpoint.ecs_agent_endpoint.id
+  destination_cidr_block = "local"
+}
+
+resource "aws_route" "ecr_dkr_route" {
+  count = module.vpc.private_route_table_ids
+  route_table_id            = module.vpc.private_route_table_ids[count.index]
+  vpc_endpoint_id           = aws_vpc_endpoint.ecr_endpoint.id
+  destination_cidr_block = "local"
+}
+
+resource "aws_route" "ecs_telemetry_route" {
+  count = module.vpc.private_route_table_ids
+  route_table_id            = module.vpc.private_route_table_ids[count.index]
+  vpc_endpoint_id           = aws_vpc_endpoint.ecs_telemetry_endpoint.id
+  destination_cidr_block = "local"
+}*/

@@ -59,11 +59,11 @@ DNS failover
 
 Acesso Ec2 Instance Connect
 
-aws ec2-instance-connect ssh --instance-id i-0a988eac4cf0deae8 (apenas no cloudshell)
+aws ec2-instance-connect ssh --instance-id i-02974b74603a0a83b (apenas no cloudshell)
 
 aws ssm start-session --target i-005332ecba8aaeca1 --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters '{"host":["10.15.80.98"],"portNumber":["5432"],"localPortNumber":["5435"]}' --region us-east-2 --profile brunofreitas-UbuntuHome
 
-aws ssm start-session --target i-07e88d11d31891b4d
+aws ssm start-session --target i-02974b74603a0a83b
 
 aws ssm start-session --target i-01d6492abd56ea793 --region eu-north-1
 
@@ -71,7 +71,7 @@ ssh -o "IdentitiesOnly=yes" -i Downloads/laboratorio-aws-2024-keys.pem ec2-user@
 
 ssh -o "IdentitiesOnly=yes" -i .ssh/id_rsa.pub ec2-user@localhost -p 2222
 
-
+aws rds generate-db-auth-token --hostname semanaconectividadeaws-db-mysql.c6uxh1t95jvm.us-east-2.rds.amazonaws.com --port 5432 --region us-east-2 --username admin
 
 ## aplicar a chave authorized_hosts temporariamente para habilitar o acesso
 aws ec2-instance-connect send-ssh-public-key --instance-id i-0f22823e4ac5905bb --instance-os-user ec2-user --ssh-public-key file://.ssh/id_rsa.pub --availability-zone us-east-2a
@@ -175,3 +175,15 @@ module "efs_backup" {
     perf
     ci
     revert
+
+
+
+    acesso via ssm
+    usando nat gateway
+    DNS
+    loadbalance
+    rds privado
+    testar instance connect
+    melhorar security groups
+
+    depende fazer migrate

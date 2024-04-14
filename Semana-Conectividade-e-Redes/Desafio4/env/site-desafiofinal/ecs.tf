@@ -1,4 +1,3 @@
-
 ################################################################################
 # Cluster
 ################################################################################
@@ -28,22 +27,6 @@ module "ecs_cluster" {
         base   = 20
       }
     }
-    # Spot instances
-    #ex_2 = {
-    #  auto_scaling_group_arn         = module.autoscaling["ex_2"].autoscaling_group_arn
-    #  managed_termination_protection = "ENABLED"
-    #
-    #  managed_scaling = {
-    #    maximum_scaling_step_size = 15
-    #    minimum_scaling_step_size = 5
-    #    status                    = "ENABLED"
-    #    target_capacity           = 90
-    #  }
-    #
-    #  default_capacity_provider_strategy = {
-    #    weight = 40
-    #  }
-    #}
   }
   tags = var.desc_tags
 }
@@ -51,7 +34,6 @@ module "ecs_cluster" {
 ################################################################################
 # Service
 ################################################################################
-
 module "ecs_service" {
   source  = "terraform-aws-modules/ecs/aws//modules/service"
   version = "~> 5.11"
@@ -62,8 +44,8 @@ module "ecs_service" {
 
   # Task Definition
   requires_compatibilities = ["EC2"]
-  cpu                      = 768 # Valor em unidades de CPU
-  memory                   = 768 # Valor em megabytes
+  cpu                      = 768 
+  memory                   = 768 
   network_mode             = "bridge"
   capacity_provider_strategy = {
     # On-demand instances
@@ -74,32 +56,39 @@ module "ecs_service" {
     }
   }
 
-  #volume = {
-  #  my-vol = {}
-  #}
-
   # Container definition(s)
   container_definitions = {
     ("bia") = {
-      #image = "public.ecr.aws/ecs-sample-image/amazon-ecs-sample:latest"
       image = "${aws_ecr_repository.ecr.repository_url}:latest"
-      #993087404463.dkr.ecr.us-east-2.amazonaws.com/semanaconectividadeaws_ecr
       port_mappings = [
         {
           name          = "bia"
           containerPort = 8080
           protocol      = "tcp"
+          hostPort      = 8080
         }
       ]
-      cpu    = 256 # Valor em unidades de CPU (1 vCPU = 1024 unidades de CPU)
-      memory = 256 # Valor em megabytes
+      cpu    = 256 
+      memory = 256 
 
-      #mount_points = [
-      #  {
-      #    sourceVolume  = "my-vol",
-      #    containerPath = "/var/www/my-vol"
-      #  }
-      #]
+      environment = [
+      {
+        name  = "DB_USER"
+        value = "bia"
+      },
+      {
+        name  = "DB_PWD"
+        value = "hp:i7)McU}%2>!v+.B:.dGNLwrF>"
+      },
+      {
+        name  = "DB_HOST"
+        value = "${module.rds.db_instance_address}"
+      },
+      {
+        name  = "DB_PORT"
+        value = "5432"
+      }
+    ]
 
       entry_point = ["tail -f /dev/null"]
 
@@ -129,9 +118,9 @@ module "ecs_service" {
   security_group_rules = {
     alb_http_ingress = {
       type                     = "ingress"
-      from_port                = 8080
-      to_port                  = 8080
-      protocol                 = "tcp"
+      from_port                = 0
+      to_port                  = 0
+      protocol                 = "-1"
       description              = "Service port"
       source_security_group_id = module.alb.security_group_id
     }
@@ -174,8 +163,8 @@ module "alb" {
   # Security Group
   security_group_ingress_rules = {
     all_http = {
-      from_port   = 8080
-      to_port     = 8080
+      from_port   = 80
+      to_port     = 80
       ip_protocol = "tcp"
       cidr_ipv4   = "0.0.0.0/0"
     }
@@ -189,7 +178,7 @@ module "alb" {
 
   listeners = {
     bia_http = {
-      port     = 8080
+      port     = 80
       protocol = "HTTP"
 
       forward = {

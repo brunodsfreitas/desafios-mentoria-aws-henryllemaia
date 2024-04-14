@@ -62,16 +62,16 @@ module "sg_rds" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "5.1.2"
 
-  name                = "${var.desc_tags.project}-sg-ecr"
+  name                = "${var.desc_tags.project}-sg-rds"
   description         = "sg-ecr"
   vpc_id              = module.vpc.vpc_id
   ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
   ingress_with_cidr_blocks = [
     {
-      from_port   = 3306
-      to_port     = 3306
+      from_port   = 5432
+      to_port     = 5432
       protocol    = "tcp"
-      description = "MySQL access from within VPC"
+      description = "PGSQL access from within VPC"
       cidr_blocks = module.vpc.vpc_cidr_block
     }
   ]

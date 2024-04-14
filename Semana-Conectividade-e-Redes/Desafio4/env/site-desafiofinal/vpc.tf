@@ -13,18 +13,18 @@ module "vpc" {
 
   tags = var.desc_tags
 
-  default_vpc_enable_dns_support                             = true
-  default_vpc_enable_dns_hostnames                           = true
-  enable_nat_gateway                                         = false
-  enable_vpn_gateway                                         = false
-  single_nat_gateway                                         = false
-  one_nat_gateway_per_az                                     = false
-  public_dedicated_network_acl                               = false
-  private_dedicated_network_acl                              = false
-  map_public_ip_on_launch                                    = true
-  intra_subnet_enable_resource_name_dns_a_record_on_launch   = true
-  public_subnet_enable_resource_name_dns_a_record_on_launch  = true
-  private_subnet_enable_resource_name_dns_a_record_on_launch = true
+  default_vpc_enable_dns_support                              = true
+  default_vpc_enable_dns_hostnames                            = true
+  enable_nat_gateway                                          = true
+  enable_vpn_gateway                                          = false
+  single_nat_gateway                                          = true
+  one_nat_gateway_per_az                                      = false
+  public_dedicated_network_acl                                = false
+  private_dedicated_network_acl                               = false
+  map_public_ip_on_launch                                     = true
+  database_subnet_enable_resource_name_dns_a_record_on_launch = true
+  public_subnet_enable_resource_name_dns_a_record_on_launch   = true
+  private_subnet_enable_resource_name_dns_a_record_on_launch  = true
 
   # Cloudwatch log group and IAM role will be created
   enable_flow_log                      = true
@@ -34,65 +34,11 @@ module "vpc" {
   flow_log_max_aggregation_interval         = 60
   flow_log_cloudwatch_log_group_name_prefix = "/${var.desc_tags.project}/"
   flow_log_cloudwatch_log_group_name_suffix = "vpc-flow-logs"
-  #flow_log_cloudwatch_log_group_class       = "INFREQUENT_ACCESS"
-  flow_log_cloudwatch_log_group_class       = "STANDARD"
+  flow_log_cloudwatch_log_group_class = "STANDARD"
 }
 
 resource "aws_ecr_repository" "ecr" {
   name = lower("${var.ecr_repository}")
-}
-
-################################################################################
-# Endpoints
-################################################################################
-
-resource "aws_vpc_endpoint" "ecr_endpoint" {
-  vpc_id              = module.vpc.vpc_id
-  service_name        = "com.amazonaws.${var.region}.ecr.dkr"
-  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
-  subnet_ids          = [module.vpc.public_subnets[0]]
-  vpc_endpoint_type   = "Interface"
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "ecr_api_endpoint" {
-  vpc_id              = module.vpc.vpc_id
-  service_name        = "com.amazonaws.${var.region}.ecr.api"
-  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
-  subnet_ids          = [module.vpc.public_subnets[0]]
-  vpc_endpoint_type   = "Interface"
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "ecs_agent_endpoint" {
-  vpc_id              = module.vpc.vpc_id
-  service_name        = "com.amazonaws.${var.region}.ecs-agent"
-  vpc_endpoint_type   = "Interface"
-  private_dns_enabled = true
-  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
-  subnet_ids          = [module.vpc.public_subnets[0]]
-
-
-}
-
-resource "aws_vpc_endpoint" "ecs_telemetry_endpoint" {
-  vpc_id              = module.vpc.vpc_id
-  service_name        = "com.amazonaws.${var.region}.ecs-telemetry"
-  vpc_endpoint_type   = "Interface"
-  private_dns_enabled = true
-  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
-  subnet_ids          = [module.vpc.public_subnets[0]]
-
-}
-
-resource "aws_vpc_endpoint" "ecs_endpoint" {
-  vpc_id              = module.vpc.vpc_id
-  service_name        = "com.amazonaws.${var.region}.ecs"
-  vpc_endpoint_type   = "Interface"
-  private_dns_enabled = true
-  security_group_ids  = [module.sg_ecr_endpoint.security_group_id]
-  subnet_ids          = [module.vpc.public_subnets[0]]
-
 }
 
 resource "aws_ec2_instance_connect_endpoint" "eice" {
@@ -104,21 +50,22 @@ module "rds" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 6.5"
 
-  identifier = lower("${var.desc_tags.project}-db-mysql")
+  identifier = lower("${var.desc_tags.project}-db-pgsql")
 
   # All available versions: http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html#MySQL.Concepts.VersionMgmt
-  engine               = "mysql"
-  engine_version       = "8.0"
-  family               = "mysql8.0" # DB parameter group
-  major_engine_version = "8.0"      # DB option group
+  engine               = "postgres"
+  engine_version       = "14"
+  family               = "postgres14" # DB parameter group
+  major_engine_version = "14"      # DB option group
   instance_class       = "db.t3.micro"
 
   allocated_storage     = 20
   max_allocated_storage = 25
 
   db_name  = "bia"
-  username = "admin"
-  port     = 3306
+  username = "bia"
+  port     = 5432
+  password = "B14@2024lab"
 
   multi_az               = false
   db_subnet_group_name   = module.vpc.database_subnet_group
@@ -126,8 +73,8 @@ module "rds" {
 
   maintenance_window              = "Mon:00:00-Mon:03:00"
   backup_window                   = "03:00-06:00"
-  enabled_cloudwatch_logs_exports = ["general"]
-  create_cloudwatch_log_group     = false
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  create_cloudwatch_log_group     = true
 
   skip_final_snapshot = true
   deletion_protection = false
@@ -139,34 +86,22 @@ module "rds" {
 
   parameters = [
     {
-      name  = "character_set_client"
-      value = "utf8mb4"
+      name  = "autovacuum"
+      value = 1
     },
     {
-      name  = "character_set_server"
-      value = "utf8mb4"
+      name  = "client_encoding"
+      value = "utf8"
     }
   ]
   tags = var.desc_tags
 }
-/*
-resource "aws_route" "ecs_agent_route" {
-  count = module.vpc.private_route_table_ids
-  route_table_id            = module.vpc.private_route_table_ids[count.index]
-  vpc_endpoint_id           = aws_vpc_endpoint.ecs_agent_endpoint.id
-  destination_cidr_block = "local"
-}
 
-resource "aws_route" "ecr_dkr_route" {
-  count = module.vpc.private_route_table_ids
-  route_table_id            = module.vpc.private_route_table_ids[count.index]
-  vpc_endpoint_id           = aws_vpc_endpoint.ecr_endpoint.id
-  destination_cidr_block = "local"
+#DNS Record
+resource "aws_route53_record" "alb_dns_record" {
+  zone_id = var.domain
+  name    = "desafio4"
+  type    = "CNAME"
+  ttl     = 300
+  records = [module.alb.dns_name]
 }
-
-resource "aws_route" "ecs_telemetry_route" {
-  count = module.vpc.private_route_table_ids
-  route_table_id            = module.vpc.private_route_table_ids[count.index]
-  vpc_endpoint_id           = aws_vpc_endpoint.ecs_telemetry_endpoint.id
-  destination_cidr_block = "local"
-}*/

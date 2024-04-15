@@ -7,7 +7,7 @@ module "ecs_cluster" {
   version = "~> 5.11"
 
   cluster_name            = var.ecs_name
-  task_exec_iam_role_name = "role-acesso-ssm"
+  task_exec_iam_role_name = var.ecs_iam_role_task_exec
 
   # Capacity provider - autoscaling groups
   default_capacity_provider_use_fargate = false
@@ -44,8 +44,8 @@ module "ecs_service" {
 
   # Task Definition
   requires_compatibilities = ["EC2"]
-  cpu                      = 768 
-  memory                   = 768 
+  cpu                      = 768
+  memory                   = 768
   network_mode             = "bridge"
   capacity_provider_strategy = {
     # On-demand instances
@@ -63,32 +63,32 @@ module "ecs_service" {
       port_mappings = [
         {
           name          = "bia"
-          containerPort = 8080
+          containerPort = var.ecs_container_port
           protocol      = "tcp"
-          hostPort      = 8080
+          hostPort      = var.ecs_container_port
         }
       ]
-      cpu    = 256 
-      memory = 256 
+      cpu    = 256
+      memory = 256
 
       environment = [
-      {
-        name  = "DB_USER"
-        value = "bia"
-      },
-      {
-        name  = "DB_PWD"
-        value = "hp:i7)McU}%2>!v+.B:.dGNLwrF>"
-      },
-      {
-        name  = "DB_HOST"
-        value = "${module.rds.db_instance_address}"
-      },
-      {
-        name  = "DB_PORT"
-        value = "5432"
-      }
-    ]
+        {
+          name  = "DB_USER"
+          value = var.rds_username
+        },
+        {
+          name  = "DB_PWD"
+          value = var.rds_password
+        },
+        {
+          name  = "DB_HOST"
+          value = "${module.rds.db_instance_address}"
+        },
+        {
+          name  = "DB_PORT"
+          value = "5432"
+        }
+      ]
 
       entry_point = ["tail -f /dev/null"]
 
@@ -110,7 +110,7 @@ module "ecs_service" {
     service = {
       target_group_arn = module.alb.target_groups["bia"].arn
       container_name   = "bia"
-      container_port   = 8080
+      container_port   = var.ecs_container_port
     }
   }
 
@@ -127,7 +127,7 @@ module "ecs_service" {
   }
   #$$ validar a necessidade desse trecho iam abaixo
   tasks_iam_role_name        = "${var.desc_tags.project}-tasks"
-  tasks_iam_role_description = "Example tasks IAM role"
+  tasks_iam_role_description = "Tasks IAM role"
   tasks_iam_role_policies = {
     ReadOnlyAccess = "arn:aws:iam::aws:policy/ReadOnlyAccess"
   }
@@ -163,8 +163,8 @@ module "alb" {
   # Security Group
   security_group_ingress_rules = {
     all_http = {
-      from_port   = 80
-      to_port     = 80
+      from_port   = var.ecs_alb_port
+      to_port     = var.ecs_alb_port
       ip_protocol = "tcp"
       cidr_ipv4   = "0.0.0.0/0"
     }
@@ -178,7 +178,7 @@ module "alb" {
 
   listeners = {
     bia_http = {
-      port     = 80
+      port     = var.ecs_alb_port
       protocol = "HTTP"
 
       forward = {
@@ -190,7 +190,7 @@ module "alb" {
   target_groups = {
     bia = {
       backend_protocol                  = "HTTP"
-      backend_port                      = 8080
+      backend_port                      = var.ecs_container_port
       target_type                       = "instance"
       deregistration_delay              = 10
       load_balancing_cross_zone_enabled = true
@@ -245,7 +245,7 @@ module "autoscaling" {
 
   security_groups                 = [module.autoscaling_sg.security_group_id]
   user_data                       = base64encode(each.value.user_data)
-  key_name                        = var.key_name
+  key_name                        = var.ecs_asg_key
   ignore_desired_capacity_changes = true
 
   create_iam_instance_profile = true

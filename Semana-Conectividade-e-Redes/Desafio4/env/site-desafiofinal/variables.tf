@@ -70,117 +70,6 @@ variable "subnet_availability_zones" {
   default     = null
 }
 
-variable "public_inbound_acl_rules" {
-  type        = list(map(string))
-  description = "public_inbound_acl_rules"
-  default     = null
-}
-
-variable "public_outbound_acl_rules" {
-  type        = list(map(string))
-  description = "public_inbound_acl_rules"
-  default     = null
-}
-
-variable "private_inbound_acl_rules" {
-  type        = list(map(string))
-  description = "private_inbound_acl_rules"
-  default     = null
-}
-
-variable "private_outbound_acl_rules" {
-  type        = list(map(string))
-  description = "private_outbound_acl_rules"
-  default     = null
-}
-### vpc 2
-variable "vpc2_cidr_block" {
-  type        = string
-  description = "VPC CIDR Block"
-  default     = null
-}
-variable "vpc2_private_subnets" {
-  type        = list(string)
-  description = "Intra Subnets CIDR Block"
-  default     = null
-}
-variable "vpc2_public_subnets" {
-  type        = list(string)
-  description = "Intra Subnets CIDR Block"
-  default     = null
-}
-variable "vpc2_subnet_availability_zones" {
-  type        = list(string)
-  description = "Subnet availability zones"
-  default     = null
-}
-### vpc 3
-variable "vpc3_cidr_block" {
-  type        = string
-  description = "VPC CIDR Block"
-  default     = null
-}
-variable "vpc3_public_subnets" {
-  type        = list(string)
-  description = "Intra Subnets CIDR Block"
-  default     = null
-}
-variable "vpc3_subnet_availability_zones" {
-  type        = list(string)
-  description = "Subnet availability zones"
-  default     = null
-}
-
-### vpc 4
-variable "vpc4_cidr_block" {
-  type        = string
-  description = "VPC CIDR Block"
-  default     = null
-}
-variable "vpc4_public_subnets" {
-  type        = list(string)
-  description = "Intra Subnets CIDR Block"
-  default     = null
-}
-variable "vpc4_private_subnets" {
-  type        = list(string)
-  description = "Intra Subnets CIDR Block"
-  default     = null
-}
-variable "vpc4_subnet_availability_zones" {
-  type        = list(string)
-  description = "Subnet availability zones"
-  default     = null
-}
-
-###############
-### EC2 
-###############
-variable "ec2_name" {
-  type        = string
-  description = "EC2 name"
-  default     = null
-}
-variable "instance_type" {
-  type        = string
-  description = "EC2 instance_type"
-  default     = "t2.micro"
-}
-variable "key_name" {
-  type        = string
-  description = "EC2 key_name"
-  default     = null
-}
-variable "iam_instance_profile" {
-  type        = string
-  description = "EC2 iam_instance_profile"
-  default     = null
-}
-variable "user_data" {
-  type        = string
-  description = "EC2 user_data"
-  default     = null
-}
 
 ### ec2 2
 variable "ec2_2_name" {
@@ -443,15 +332,19 @@ variable "sg7_egress_with_cidr_blocks1" {
   default     = null
 }
 
-
-
-####
-#novos - organizar
-
+###############
+### ECS
+###############
 variable "ecs_name" {
   type        = string
   description = "ecs_name"
   default     = "ECS"
+}
+
+variable "ecs_iam_role_task_exec" {
+  type        = string
+  description = "ecs_iam_role_task_exec"
+  default     = null
 }
 
 variable "ecs_service_1_name" {
@@ -465,16 +358,19 @@ variable "as_health_check_type" {
   description = "as_health_check_type"
   default     = "EC2"
 }
+
 variable "as_min_size" {
   type        = number
   description = "as_min_size"
   default     = 1
 }
+
 variable "as_max_size" {
   type        = number
   description = "as_max_size"
   default     = 3
 }
+
 variable "as_desired_capacity" {
   type        = number
   description = "as_desired_capacity"
@@ -490,5 +386,52 @@ variable "ecr_repository" {
 variable "eice_ip_range" {
   type        = map(string)
   description = "eice_ip_range"
+  default     = null
+}
+
+variable "ecs_alb_port" {
+  type        = number
+  description = "ecs_alb_port"
+  default     = null
+}
+variable "ecs_container_port" {
+  type        = number
+  description = "ecs_container_port"
+  default     = null
+}
+
+variable "ecs_asg_key" {
+  type        = string
+  description = "ecs_asg_key"
+  default     = null
+}
+
+###############
+### RDS
+###############
+variable "rds_instance_class" {
+  type        = string
+  description = "rds_instance_class"
+  default     = "db.t3.micro"
+}
+variable "rds_db_name" {
+  type        = string
+  description = "rds_db_name"
+  default     = null
+}
+variable "rds_username" {
+  type        = string
+  description = "rds_username"
+  default     = null
+}
+variable "rds_password" {
+  type        = string
+  description = "rds_password"
+  default     = null
+  sensitive   = true
+}
+variable "alb_subdomain_dns_record" {
+  type        = string
+  description = "alb_subdomain_dns_record"
   default     = null
 }

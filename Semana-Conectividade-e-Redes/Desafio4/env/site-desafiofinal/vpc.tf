@@ -5,10 +5,9 @@ module "vpc" {
   name = "${var.desc_tags.project}-vpc-desafio4"
   cidr = var.vpc_cidr_block
 
-  azs             = var.subnet_availability_zones
-  public_subnets  = var.public_subnets
-  private_subnets = var.private_subnets
-  #intra_subnets   = var.intra_subnets
+  azs              = var.subnet_availability_zones
+  public_subnets   = var.public_subnets
+  private_subnets  = var.private_subnets
   database_subnets = var.database_subnets
 
   tags = var.desc_tags
@@ -34,7 +33,7 @@ module "vpc" {
   flow_log_max_aggregation_interval         = 60
   flow_log_cloudwatch_log_group_name_prefix = "/${var.desc_tags.project}/"
   flow_log_cloudwatch_log_group_name_suffix = "vpc-flow-logs"
-  flow_log_cloudwatch_log_group_class = "STANDARD"
+  flow_log_cloudwatch_log_group_class       = "STANDARD"
 }
 
 resource "aws_ecr_repository" "ecr" {
@@ -52,20 +51,19 @@ module "rds" {
 
   identifier = lower("${var.desc_tags.project}-db-pgsql")
 
-  # All available versions: http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html#MySQL.Concepts.VersionMgmt
   engine               = "postgres"
   engine_version       = "14"
-  family               = "postgres14" # DB parameter group
-  major_engine_version = "14"      # DB option group
-  instance_class       = "db.t3.micro"
+  family               = "postgres14"
+  major_engine_version = "14"
+  instance_class       = var.rds_instance_class
 
   allocated_storage     = 20
   max_allocated_storage = 25
 
-  db_name  = "bia"
-  username = "bia"
+  db_name  = var.rds_db_name
+  username = var.rds_username
   port     = 5432
-  password = "B14@2024lab"
+  password = var.rds_password
 
   multi_az               = false
   db_subnet_group_name   = module.vpc.database_subnet_group
@@ -74,7 +72,7 @@ module "rds" {
   maintenance_window              = "Mon:00:00-Mon:03:00"
   backup_window                   = "03:00-06:00"
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
-  create_cloudwatch_log_group     = true
+  create_cloudwatch_log_group     = false
 
   skip_final_snapshot = true
   deletion_protection = false
@@ -100,7 +98,7 @@ module "rds" {
 #DNS Record
 resource "aws_route53_record" "alb_dns_record" {
   zone_id = var.domain
-  name    = "desafio4"
+  name    = var.alb_subdomain_dns_record
   type    = "CNAME"
   ttl     = 300
   records = [module.alb.dns_name]

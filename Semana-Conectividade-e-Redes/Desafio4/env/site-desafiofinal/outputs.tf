@@ -111,11 +111,9 @@ output "ecr_repository_url" {
   description = "ECR URL"
   value       = aws_ecr_repository.ecr.repository_url
 }
-#organizar
-output "IP_RANGE_EICE" {
-  description = "EC2 Instance Connect Endpoint AWS IP Ranges"
-  value       = data.external.get_ip_range_eiec.result
-}
+################################################################################
+# RDS
+################################################################################
 output "db_instance_address" {
   description = "The address of the RDS instance"
   value       = module.rds.db_instance_address

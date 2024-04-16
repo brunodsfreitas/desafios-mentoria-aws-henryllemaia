@@ -44,10 +44,10 @@ output "service_iam_role_unique_id" {
   description = "Stable and unique string identifying the service IAM role"
   value       = module.ecs_service.iam_role_unique_id
 }
-output "service_container_definitions" {
-  description = "Container definitions"
-  value       = module.ecs_service.container_definitions
-}
+#output "service_container_definitions" {
+#  description = "Container definitions"
+#  value       = module.ecs_service.container_definitions
+#}
 output "service_task_definition_arn" {
   description = "Full ARN of the Task Definition (including both `family` and `revision`)"
   value       = module.ecs_service.task_definition_arn

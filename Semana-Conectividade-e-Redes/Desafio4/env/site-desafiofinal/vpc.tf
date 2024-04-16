@@ -40,11 +40,6 @@ resource "aws_ecr_repository" "ecr" {
   name = lower("${var.ecr_repository}")
 }
 
-resource "aws_ec2_instance_connect_endpoint" "eice" {
-  subnet_id          = module.vpc.private_subnets[0]
-  security_group_ids = [module.sg_eice.security_group_id]
-}
-
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 6.5"

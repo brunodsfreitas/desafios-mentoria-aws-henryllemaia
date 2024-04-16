@@ -5,16 +5,16 @@
 module "ecs_cluster" {
   source  = "terraform-aws-modules/ecs/aws"
   version = "~> 5.11"
-
+  #
   cluster_name            = var.ecs_name
   task_exec_iam_role_name = var.ecs_iam_role_task_exec
 
-  # Capacity provider - autoscaling groups
+  #Capacity provider - autoscaling groups
   default_capacity_provider_use_fargate = false
   autoscaling_capacity_providers = {
     # On-demand instances
-    workers_green = {
-      auto_scaling_group_arn         = module.autoscaling["workers_green"].autoscaling_group_arn
+    app_green = {
+      auto_scaling_group_arn         = module.autoscaling["app_green"].autoscaling_group_arn
       managed_termination_protection = "ENABLED"
       managed_scaling = {
         maximum_scaling_step_size = 2
@@ -49,8 +49,8 @@ module "ecs_service" {
   network_mode             = "bridge"
   capacity_provider_strategy = {
     # On-demand instances
-    workers_green = {
-      capacity_provider = module.ecs_cluster.autoscaling_capacity_providers["workers_green"].name
+    app_green = {
+      capacity_provider = module.ecs_cluster.autoscaling_capacity_providers["app_green"].name
       weight            = 1
       base              = 1
     }
@@ -59,7 +59,14 @@ module "ecs_service" {
   # Container definition(s)
   container_definitions = {
     ("bia") = {
-      image = "${aws_ecr_repository.ecr.repository_url}:latest"
+      image              = "${aws_ecr_repository.ecr.repository_url}:latest"
+      cpu                = 256
+      memory             = 256
+      memory_reservation = 256
+      essential          = true
+      health_check = {
+        command = ["CMD-SHELL", "curl -f http://localhost:${var.ecs_container_port}/ || exit 1"]
+      }
       port_mappings = [
         {
           name          = "bia"
@@ -68,9 +75,6 @@ module "ecs_service" {
           hostPort      = var.ecs_container_port
         }
       ]
-      cpu    = 256
-      memory = 256
-
       environment = [
         {
           name  = "DB_USER"
@@ -126,7 +130,7 @@ module "ecs_service" {
     }
   }
   #$$ validar a necessidade desse trecho iam abaixo
-  tasks_iam_role_name        = "${var.desc_tags.project}-tasks"
+  tasks_iam_role_name        = "${var.desc_tags.project}-tasks-role"
   tasks_iam_role_description = "Tasks IAM role"
   tasks_iam_role_policies = {
     ReadOnlyAccess = "arn:aws:iam::aws:policy/ReadOnlyAccess"
@@ -222,7 +226,7 @@ module "autoscaling" {
 
   for_each = {
     # On-demand instances
-    workers_green = {
+    app_green = {
       instance_type              = "t3.micro"
       use_mixed_instances_policy = false
       mixed_instances_policy     = {}
@@ -254,7 +258,6 @@ module "autoscaling" {
   iam_role_policies = {
     AmazonEC2ContainerServiceforEC2Role = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
     AmazonSSMManagedInstanceCore        = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-    AmazonEC2InstanceConnect            = "arn:aws:iam::aws:policy/EC2InstanceConnect"
   }
 
   vpc_zone_identifier = module.vpc.private_subnets
@@ -263,7 +266,6 @@ module "autoscaling" {
   max_size            = var.as_max_size
   desired_capacity    = var.as_desired_capacity
 
-  # https://github.com/hashicorp/terraform-provider-aws/issues/12582
   autoscaling_group_tags = {
     AmazonECSManaged = true
   }

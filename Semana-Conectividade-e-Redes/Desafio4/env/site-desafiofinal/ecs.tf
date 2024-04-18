@@ -1,39 +1,39 @@
 ################################################################################
 # Cluster
 ################################################################################
-
+/*
 module "ecs_cluster" {
-  source  = "terraform-aws-modules/ecs/aws"
-  version = "~> 5.11"
-  #
-  cluster_name            = var.ecs_name
-  task_exec_iam_role_name = var.ecs_iam_role_task_exec
+  source       = "terraform-aws-modules/ecs/aws"
+  version      = "~> 5.11"
+  cluster_name = var.ecs_name
 
+  task_exec_iam_role_name = var.ecs_iam_role_task_exec
   #Capacity provider - autoscaling groups
   default_capacity_provider_use_fargate = false
   autoscaling_capacity_providers = {
-    # On-demand instances
+    # On-demand instancess
     app_green = {
       auto_scaling_group_arn         = module.autoscaling["app_green"].autoscaling_group_arn
       managed_termination_protection = "ENABLED"
       managed_scaling = {
-        maximum_scaling_step_size = 2
+        maximum_scaling_step_size = 1
         minimum_scaling_step_size = 1
         status                    = "ENABLED"
-        target_capacity           = 70
+        target_capacity           = 2
       }
       default_capacity_provider_strategy = {
-        weight = 70
-        base   = 20
+        weight = 1
+        base   = 1
       }
     }
   }
   tags = var.desc_tags
 }
-
+*/
 ################################################################################
 # Service
 ################################################################################
+/*
 module "ecs_service" {
   source  = "terraform-aws-modules/ecs/aws//modules/service"
   version = "~> 5.11"
@@ -43,10 +43,15 @@ module "ecs_service" {
   cluster_arn = module.ecs_cluster.cluster_arn
 
   # Task Definition
-  requires_compatibilities = ["EC2"]
-  cpu                      = 768
-  memory                   = 768
-  network_mode             = "bridge"
+  requires_compatibilities           = ["EC2"]
+  cpu                                = 512
+  memory                             = 256
+  network_mode                       = "bridge"
+  desired_count                      = var.as_desired_capacity
+  deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
+  health_check_grace_period_seconds  = 45
+
   capacity_provider_strategy = {
     # On-demand instances
     app_green = {
@@ -59,11 +64,12 @@ module "ecs_service" {
   # Container definition(s)
   container_definitions = {
     ("bia") = {
-      image              = "${aws_ecr_repository.ecr.repository_url}:latest"
-      cpu                = 256
-      memory             = 256
-      memory_reservation = 256
-      essential          = true
+      image  = "${aws_ecr_repository.ecr.repository_url}:latest"
+      cpu    = 512
+      memory = 256
+      #memory_reservation = 256
+      essential        = true
+      desired_capacity = 2
       health_check = {
         command = ["CMD-SHELL", "curl -f http://localhost:${var.ecs_container_port}/ || exit 1"]
       }
@@ -144,7 +150,7 @@ module "ecs_service" {
 
   tags       = var.desc_tags
   depends_on = [aws_ecr_repository.ecr]
-}
+}*/
 
 ################################################################################
 # ALB
@@ -219,7 +225,7 @@ module "alb" {
 
   tags = var.desc_tags
 }
-
+/*
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "~> 6.5"
@@ -277,7 +283,154 @@ module "autoscaling" {
   use_mixed_instances_policy = each.value.use_mixed_instances_policy
   mixed_instances_policy     = each.value.mixed_instances_policy
 
+  scaling_policies = [
+    {
+      name                    = "scale-in"
+      adjustment_type         = "ChangeInCapacity"
+      cooldown                = 120
+      metric_aggregation_type = "Average"
+      scaling_adjustment      = -1
+      adjustment_scaling_type = "ChangeInCapacity"
+      evaluation_periods      = 2
+    },
+    {
+      name                    = "scale-out"
+      adjustment_type         = "ChangeInCapacity"
+      cooldown                = 120
+      metric_aggregation_type = "Average"
+      scaling_adjustment      = 1
+      adjustment_scaling_type = "ChangeInCapacity"
+      evaluation_periods      = 2
+    },
+  ]
+
   tags = var.desc_tags
+}*/
+/*
+# Criação do Cluster ECS
+resource "aws_ecs_cluster" "ecs" {
+  name = "example-cluster"
 }
 
+# Criação do Launch Configuration
+resource "aws_launch_configuration" "example" {
+  name          = "example-launch-config"
+  image_id      = "ami-12345678" # ID da AMI desejada
+  instance_type = "t3.micro"      # Tipo de instância desejado
 
+  security_groups = ["${aws_security_group.instance.id}"]
+  key_name        = "example-keypair"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  user_data = <<-EOF
+              #!/bin/bash
+              echo ECS_CLUSTER=${aws_ecs_cluster.example.name} >> /etc/ecs/ecs.config
+              EOF
+}
+
+# Criação do Auto Scaling Group
+resource "aws_autoscaling_group" "example" {
+  name                 = "example-asg"
+  launch_configuration = aws_launch_configuration.example.id
+  min_size             = 1
+  max_size             = 4
+  desired_capacity     = 2
+  vpc_zone_identifier  = ["subnet-12345678"] # Subnet ID desejada
+
+  # Configurações de Upscaling
+  scaling_policy {
+    adjustment_type         = "ChangeInCapacity"
+    estimated_instance_warmup = 300 # Tempo de espera em segundos para as novas instâncias estarem prontas
+    cooldown               = 300 # Tempo de espera em segundos antes de permitir outro escalonamento
+    metric_aggregation_type = "Average"
+    name                    = "upscaling-policy"
+    scaling_adjustment     = 1 # Aumenta em 1 instância
+    evaluation_periods     = 3 # Número de períodos de avaliação antes que a ação de escalonamento seja executada
+    target_metric_value    = 70 # Percentual de utilização de CPU
+    target_tracking_scaling_policy_configuration {
+      predefined_metric_specification {
+        predefined_metric_type = "ASGAverageCPUUtilization"
+      }
+    }
+  }
+
+  # Configurações de Downscaling
+  scaling_policy {
+    adjustment_type         = "ChangeInCapacity"
+    estimated_instance_warmup = 300 # Tempo de espera em segundos para as novas instâncias estarem prontas
+    cooldown               = 300 # Tempo de espera em segundos antes de permitir outro escalonamento
+    metric_aggregation_type = "Average"
+    name                    = "downscaling-policy"
+    scaling_adjustment     = -1 # Reduz em 1 instância
+    evaluation_periods     = 3 # Número de períodos de avaliação antes que a ação de escalonamento seja executada
+    target_metric_value    = 20 # Percentual de utilização de CPU
+    target_tracking_scaling_policy_configuration {
+      predefined_metric_specification {
+        predefined_metric_type = "ASGAverageCPUUtilization"
+      }
+    }
+  }
+}
+
+# Regra IAM para permissões ECS
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecs-task-execution-role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+# Anexar política AmazonECSTaskExecutionRolePolicy à função
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+# Definição de Tarefa (Task Definition)
+resource "aws_ecs_task_definition" "example" {
+  family                   = "example-task"
+  container_definitions    = jsonencode([
+    {
+      name  = "example-container"
+      image = "nginx:latest"
+      # Outras configurações do contêiner...
+    }
+  ])
+  
+  # Configuração de Placement Constraints para permitir apenas uma tarefa por host
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:ecs.instance-type =~ t2.*"
+  }
+}
+
+# Criação do Serviço ECS
+resource "aws_ecs_service" "example" {
+  name            = "example-service"
+  cluster         = aws_ecs_cluster.example.id
+  task_definition = aws_ecs_task_definition.example.arn
+  desired_count   = 2
+  
+  # Configuração de estratégia de Placement para permitir apenas uma tarefa por host
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:ecs.instance-type =~ t3.*"
+  }
+}
+
+*/

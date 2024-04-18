@@ -1,7 +1,7 @@
 ################################################################################
 # Cluster
 ################################################################################
-/*
+
 module "ecs_cluster" {
   source       = "terraform-aws-modules/ecs/aws"
   version      = "~> 5.11"
@@ -29,11 +29,11 @@ module "ecs_cluster" {
   }
   tags = var.desc_tags
 }
-*/
+
 ################################################################################
 # Service
 ################################################################################
-/*
+
 module "ecs_service" {
   source  = "terraform-aws-modules/ecs/aws//modules/service"
   version = "~> 5.11"
@@ -69,10 +69,10 @@ module "ecs_service" {
       memory = 256
       #memory_reservation = 256
       essential        = true
-      desired_capacity = 2
-      health_check = {
-        command = ["CMD-SHELL", "curl -f http://localhost:${var.ecs_container_port}/ || exit 1"]
-      }
+      #desired_capacity = 2
+      #health_check = {
+      #  command = ["CMD-SHELL", "curl -f http://localhost:${var.ecs_container_port}/ || exit 1"]
+      #}
       port_mappings = [
         {
           name          = "bia"
@@ -150,7 +150,7 @@ module "ecs_service" {
 
   tags       = var.desc_tags
   depends_on = [aws_ecr_repository.ecr]
-}*/
+}
 
 ################################################################################
 # ALB
@@ -225,7 +225,7 @@ module "alb" {
 
   tags = var.desc_tags
 }
-/*
+
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "~> 6.5"
@@ -305,132 +305,14 @@ module "autoscaling" {
   ]
 
   tags = var.desc_tags
-}*/
-/*
-# Criação do Cluster ECS
-resource "aws_ecs_cluster" "ecs" {
-  name = "example-cluster"
 }
 
-# Criação do Launch Configuration
-resource "aws_launch_configuration" "example" {
-  name          = "example-launch-config"
-  image_id      = "ami-12345678" # ID da AMI desejada
-  instance_type = "t3.micro"      # Tipo de instância desejado
-
-  security_groups = ["${aws_security_group.instance.id}"]
-  key_name        = "example-keypair"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  user_data = <<-EOF
-              #!/bin/bash
-              echo ECS_CLUSTER=${aws_ecs_cluster.example.name} >> /etc/ecs/ecs.config
-              EOF
+#terminar
+resource "aws_instance" "bastion_host" {
+  ami = ""
+  instance_type = "t3.micro"
+  vpc_security_group_ids = ""
+  iam_instance_profile = var.ecs_iam_role_task_exec
+  subnet_id = module.vpc.intra_subnets[0]
+  tags = var.desc_tags
 }
-
-# Criação do Auto Scaling Group
-resource "aws_autoscaling_group" "example" {
-  name                 = "example-asg"
-  launch_configuration = aws_launch_configuration.example.id
-  min_size             = 1
-  max_size             = 4
-  desired_capacity     = 2
-  vpc_zone_identifier  = ["subnet-12345678"] # Subnet ID desejada
-
-  # Configurações de Upscaling
-  scaling_policy {
-    adjustment_type         = "ChangeInCapacity"
-    estimated_instance_warmup = 300 # Tempo de espera em segundos para as novas instâncias estarem prontas
-    cooldown               = 300 # Tempo de espera em segundos antes de permitir outro escalonamento
-    metric_aggregation_type = "Average"
-    name                    = "upscaling-policy"
-    scaling_adjustment     = 1 # Aumenta em 1 instância
-    evaluation_periods     = 3 # Número de períodos de avaliação antes que a ação de escalonamento seja executada
-    target_metric_value    = 70 # Percentual de utilização de CPU
-    target_tracking_scaling_policy_configuration {
-      predefined_metric_specification {
-        predefined_metric_type = "ASGAverageCPUUtilization"
-      }
-    }
-  }
-
-  # Configurações de Downscaling
-  scaling_policy {
-    adjustment_type         = "ChangeInCapacity"
-    estimated_instance_warmup = 300 # Tempo de espera em segundos para as novas instâncias estarem prontas
-    cooldown               = 300 # Tempo de espera em segundos antes de permitir outro escalonamento
-    metric_aggregation_type = "Average"
-    name                    = "downscaling-policy"
-    scaling_adjustment     = -1 # Reduz em 1 instância
-    evaluation_periods     = 3 # Número de períodos de avaliação antes que a ação de escalonamento seja executada
-    target_metric_value    = 20 # Percentual de utilização de CPU
-    target_tracking_scaling_policy_configuration {
-      predefined_metric_specification {
-        predefined_metric_type = "ASGAverageCPUUtilization"
-      }
-    }
-  }
-}
-
-# Regra IAM para permissões ECS
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecs-task-execution-role"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
-
-# Anexar política AmazonECSTaskExecutionRolePolicy à função
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-# Definição de Tarefa (Task Definition)
-resource "aws_ecs_task_definition" "example" {
-  family                   = "example-task"
-  container_definitions    = jsonencode([
-    {
-      name  = "example-container"
-      image = "nginx:latest"
-      # Outras configurações do contêiner...
-    }
-  ])
-  
-  # Configuração de Placement Constraints para permitir apenas uma tarefa por host
-  placement_constraints {
-    type       = "memberOf"
-    expression = "attribute:ecs.instance-type =~ t2.*"
-  }
-}
-
-# Criação do Serviço ECS
-resource "aws_ecs_service" "example" {
-  name            = "example-service"
-  cluster         = aws_ecs_cluster.example.id
-  task_definition = aws_ecs_task_definition.example.arn
-  desired_count   = 2
-  
-  # Configuração de estratégia de Placement para permitir apenas uma tarefa por host
-  placement_constraints {
-    type       = "memberOf"
-    expression = "attribute:ecs.instance-type =~ t3.*"
-  }
-}
-
-*/

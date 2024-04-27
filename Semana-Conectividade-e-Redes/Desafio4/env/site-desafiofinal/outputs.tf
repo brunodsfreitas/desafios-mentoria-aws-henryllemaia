@@ -1,7 +1,7 @@
 ################################################################################
 # Cluster
 ################################################################################
-output "cluster_arn" {
+/*output "cluster_arn" {
   description = "ARN that identifies the cluster"
   value       = module.ecs_cluster.cluster_arn
 }
@@ -21,10 +21,14 @@ output "cluster_autoscaling_capacity_providers" {
   description = "Map of capacity providers created and their attributes"
   value       = module.ecs_cluster.autoscaling_capacity_providers
 }
+*/
+output "alb_target_group_arn_bia_http_arn" {
+  value = module.alb.target_groups["bia"]["arn"]
+}
 ################################################################################
 # Service
 ################################################################################
-output "service_id" {
+/*output "service_id" {
   description = "ARN that identifies the service"
   value       = module.ecs_service.id
 }
@@ -103,7 +107,7 @@ output "service_autoscaling_policies" {
 output "service_autoscaling_scheduled_actions" {
   description = "Map of autoscaling scheduled actions and their attributes"
   value       = module.ecs_service.autoscaling_scheduled_actions
-}
+}*/
 ################################################################################
 # ECR
 ################################################################################

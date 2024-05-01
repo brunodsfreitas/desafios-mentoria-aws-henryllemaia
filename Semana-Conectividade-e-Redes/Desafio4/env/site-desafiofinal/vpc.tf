@@ -1,6 +1,6 @@
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.7"
+  version = "~> 5.8"
 
   name = "${var.desc_tags.project}-vpc-desafio4"
   cidr = var.vpc_cidr_block

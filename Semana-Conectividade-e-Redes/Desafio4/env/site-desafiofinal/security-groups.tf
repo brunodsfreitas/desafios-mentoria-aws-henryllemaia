@@ -3,7 +3,7 @@
 ################################################################################
 module "sg_eice" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.2"
+  version = "~> 5.1"
 
   name        = "${var.desc_tags.project}-sg-eice"
   description = "sg-eice"
@@ -32,7 +32,7 @@ module "sg_eice" {
 
 module "sg_ecr_endpoint" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.2"
+  version = "~> 5.1"
 
   name                = "${var.desc_tags.project}-sg-ecr"
   description         = "sg-ecr"
@@ -60,7 +60,7 @@ module "sg_ecr_endpoint" {
 
 module "sg_rds" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.2"
+  version = "~> 5.1"
 
   name                = "${var.desc_tags.project}-sg-rds"
   description         = "sg-ecr"

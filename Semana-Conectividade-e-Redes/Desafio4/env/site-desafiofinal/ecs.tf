@@ -158,7 +158,7 @@ module "ecs_service" {
 
 module "alb" {
   source  = "terraform-aws-modules/alb/aws"
-  version = "~> 9.0"
+  version = "~> 9.9"
 
   name = "${var.ecs_name}-alb"
 
@@ -314,11 +314,11 @@ resource "aws_ecs_cluster" "ecs" {
 
 # Criação do Launch Configuration
 resource "aws_launch_template" "lc_bia" {
-  name          = "lc-bia"
-  image_id      = jsondecode(data.aws_ssm_parameter.ecs_optimized_ami.value)["image_id"]
-  instance_type = "t3.micro"      # Tipo de instância desejado
+  name                   = "lc-bia"
+  image_id               = jsondecode(data.aws_ssm_parameter.ecs_optimized_ami.value)["image_id"]
+  instance_type          = "t3.micro" # Tipo de instância desejado
   vpc_security_group_ids = [module.autoscaling_sg.security_group_id]
-  key_name        = var.ecs_asg_key
+  key_name               = var.ecs_asg_key
   iam_instance_profile {
     arn = aws_iam_instance_profile.bia_service_instance_profile.arn
   }
@@ -345,12 +345,12 @@ resource "aws_iam_instance_profile" "bia_service_instance_profile" {
 
 # Criação do Auto Scaling Group
 resource "aws_autoscaling_group" "bia_asg" {
-  name                 = "bia_asg"
+  name = "bia_asg"
   #launch_template = aws_launch_configuration.lc_bia.id
-  min_size             = 1
-  max_size             = 3
-  desired_capacity     = 2
-  vpc_zone_identifier  = module.vpc.private_subnets # Subnet ID desejada
+  min_size            = 1
+  max_size            = 3
+  desired_capacity    = 2
+  vpc_zone_identifier = module.vpc.private_subnets # Subnet ID desejada
   launch_template {
     id      = aws_launch_template.lc_bia.id
     version = "$Latest"
@@ -463,15 +463,15 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 
 # Definição de Tarefa (Task Definition)
 resource "aws_ecs_task_definition" "bia_TD" {
-  family                   = "bia-TD"
-  container_definitions    = jsonencode([
+  family = "bia-TD"
+  container_definitions = jsonencode([
     {
-      name  = "bia_TD"
-      image  = "${aws_ecr_repository.ecr.repository_url}:latest"
-      cpu    = 512
-      memory = 256
-      essential        = true
-      entry_point = ["tail -f /dev/null"]
+      name                                   = "bia_TD"
+      image                                  = "${aws_ecr_repository.ecr.repository_url}:latest"
+      cpu                                    = 512
+      memory                                 = 256
+      essential                              = true
+      entry_point                            = ["tail -f /dev/null"]
       enable_cloudwatch_logging              = true
       create_cloudwatch_log_group            = true
       cloudwatch_log_group_name              = "/aws/ecs/${var.ecs_name}/bia"
@@ -511,11 +511,14 @@ resource "aws_ecs_task_definition" "bia_TD" {
 
 # Criação do Serviço ECS
 resource "aws_ecs_service" "service_bia" {
-  name            = var.ecs_service_1_name
-  cluster         = var.ecs_name
-  task_definition = aws_ecs_task_definition.bia_TD.arn
-  desired_count   = 1
-  
+  name                = var.ecs_service_1_name
+  cluster             = var.ecs_name
+  task_definition     = aws_ecs_task_definition.bia_TD.arn
+  scheduling_strategy = "DAEMON"
+  deployment_controller {
+    type = "ECS"
+  }
+
   load_balancer {
     target_group_arn = module.alb.target_groups["bia"]["arn"]
     container_name   = "bia_TD"

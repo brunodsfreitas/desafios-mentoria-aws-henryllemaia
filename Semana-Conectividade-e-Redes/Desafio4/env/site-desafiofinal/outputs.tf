@@ -25,6 +25,7 @@ output "cluster_autoscaling_capacity_providers" {
 output "alb_target_group_arn_bia_http_arn" {
   value = module.alb.target_groups["bia"]["arn"]
 }
+
 ################################################################################
 # Service
 ################################################################################
@@ -125,4 +126,8 @@ output "db_instance_address" {
 output "db_instance_endpoint" {
   description = "The connection endpoint"
   value       = module.rds.db_instance_endpoint
+}
+output "bastion_host_instance_id" {
+  description = "Instance ID of Bastion Host"
+  value       = aws_instance.bastion_host.id
 }

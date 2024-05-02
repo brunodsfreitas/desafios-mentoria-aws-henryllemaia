@@ -107,6 +107,37 @@ module "autoscaling_sg" {
 
   tags = var.desc_tags
 }
+
+module "bastion_host_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.0"
+
+  name        = "bastion_host-sg"
+  description = "bastion host security group"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  #egress_cidr_blocks  = [module.vpc.vpc_cidr_block]
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "allow all (ipv4)"
+    }
+  ]
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "allow all out (ipv4)"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+
+  tags = var.desc_tags
+}
 ################################################################################
 # Security Groups Rules
 ################################################################################

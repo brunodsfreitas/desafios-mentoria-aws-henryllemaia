@@ -435,3 +435,27 @@ variable "alb_subdomain_dns_record" {
   description = "alb_subdomain_dns_record"
   default     = null
 }
+
+###############
+### EC2
+###############
+variable "instance_name" {
+  type        = string
+  description = "instance_name"
+  default     = null
+}
+variable "instance_type" {
+  type        = string
+  description = "instance_type"
+  default     = null
+}
+variable "instance_keyname" {
+  type        = string
+  description = "instance_keyname"
+  default     = null
+}
+variable "instance_iam_profile" {
+  type        = string
+  description = "instance_iam_profile"
+  default     = null
+}
